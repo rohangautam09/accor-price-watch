@@ -2,68 +2,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accor price watch</title>
 <style>
-:root { --bg:#fff; --fg:#1a1a1a; --muted:#888; --line:#e5e5e5;
-        --accent:#0a7cff; --drop:#0a8f3c; --up:#c0392b; }
+:root { --bg:#f6f7f9; --card:#ffffff; --box:#f8f9fb; --fg:#16181d;
+  --muted:#7a8089; --line:#e4e6ea; --accent:#0a6cdf;
+  --drop:#0a8f3c; --up:#c0392b; }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#111; --fg:#eee; --muted:#999; --line:#333; } }
-body { font: 15px/1.5 -apple-system, sans-serif; background:var(--bg);
-       color:var(--fg); max-width:1100px; margin:2rem auto; padding:0 1rem; }
-table { border-collapse:collapse; width:100%; }
-td, th { padding:.6rem .7rem; border-bottom:1px solid var(--line);
-         text-align:left; vertical-align:top; }
+  :root { --bg:#0e0f12; --card:#17181c; --box:#1d1f24; --fg:#e8e9eb;
+    --muted:#9aa0a8; --line:#2a2c32; --accent:#4f9cf0; } }
+* { box-sizing:border-box; }
+body { font:15px/1.55 -apple-system, "Segoe UI", sans-serif;
+  background:var(--bg); color:var(--fg); max-width:1080px;
+  margin:0 auto; padding:2rem 1.2rem 4rem; }
+h1 { font-size:1.55rem; margin:0 0 .1rem; letter-spacing:-.02em; }
 small { color:var(--muted); }
-small.pts { color:color-mix(in srgb, var(--accent) 75%, var(--muted)); }
-.badge { padding:.15rem .5rem; border-radius:99px; font-size:.85em;
-         white-space:nowrap; }
-.drop { background:color-mix(in srgb, var(--drop) 15%, transparent);
-        color:var(--drop); font-weight:600; }
-.up { background:color-mix(in srgb, var(--up) 12%, transparent);
-      color:var(--up); }
-.same, .err { background:color-mix(in srgb, var(--muted) 15%, transparent);
-              color:var(--muted); }
-a { color:var(--accent); }
-.controls { margin:1rem 0 1.5rem; }
-.pointsbar { margin:1rem 0; padding:.8rem 1rem; border:1px solid var(--line);
-  border-radius:10px; }
-.pointsbar > span { margin-right:1.4rem; white-space:nowrap; }
-.pointsbar input { padding:.25rem .4rem; border:1px solid var(--line);
-  border-radius:6px; background:var(--bg); color:var(--fg); font-size:1em; }
-.chip { display:inline-block; padding:.1rem .55rem; margin:.15rem .25rem 0 0;
-  border:1px solid var(--line); border-radius:99px; white-space:nowrap; }
-.lastcheck { display:inline-block; margin:.2rem 0 .8rem;
-  padding:.45rem 1rem; border-radius:99px; font-weight:600;
-  background:color-mix(in srgb, var(--accent) 12%, transparent);
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.pts { color:color-mix(in srgb, var(--accent) 80%, var(--muted)); }
+.card { background:var(--card); border:1px solid var(--line);
+  border-radius:16px; padding:1.05rem 1.2rem; margin-bottom:.85rem;
+  box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.chead { display:flex; justify-content:space-between; gap:1rem;
+  align-items:flex-start; }
+.hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
+.hmeta { color:var(--muted); font-size:.84rem; margin-top:.1rem; }
+.cright { text-align:right; flex:none; }
+.trend { margin-top:.4rem; opacity:.9; }
+.prices { display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(205px, 1fr));
+  gap:.6rem; margin:.85rem 0 .15rem; }
+.pbox { background:var(--box); border:1px solid var(--line);
+  border-radius:11px; padding:.6rem .8rem .65rem; }
+.plabel { font-size:.68rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.07em; color:var(--muted); margin-bottom:.2rem; }
+.pval { font-size:1.22rem; font-weight:680; letter-spacing:-.01em; }
+.pval.dim { color:var(--muted); font-size:.95rem; font-weight:500; }
+.tiny { font-size:.79rem; color:var(--muted); margin-top:.12rem; }
+.insights { display:flex; flex-wrap:wrap; gap:.4rem; margin:.6rem 0 .1rem; }
+.insights span { font-size:.8rem; padding:.28rem .65rem; border-radius:8px;
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+  color:color-mix(in srgb, var(--fg) 82%, var(--accent)); }
+.insights b { color:var(--accent); }
+.cactions { display:flex; flex-wrap:wrap; gap:1.1rem; align-items:baseline;
+  margin-top:.65rem; font-size:.86rem; }
+.badge { padding:.22rem .65rem; border-radius:99px; font-size:.84em;
+  white-space:nowrap; font-weight:600; }
+.drop { background:color-mix(in srgb, var(--drop) 14%, transparent);
+  color:var(--drop); }
+.up { background:color-mix(in srgb, var(--up) 11%, transparent);
+  color:color-mix(in srgb, var(--up) 85%, var(--fg)); }
+.same, .err { background:color-mix(in srgb, var(--muted) 14%, transparent);
+  color:var(--muted); font-weight:500; }
+.controls { margin:1rem 0 .4rem; }
+.pointsbar { margin:1rem 0 .4rem; padding:.85rem 1.1rem;
+  border:1px solid var(--line); border-radius:14px; background:var(--card); }
+.pointsbar > span { margin-right:1.5rem; white-space:nowrap; }
+.pointsbar input { padding:.3rem .45rem; border:1px solid var(--line);
+  border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
+.chip { display:inline-block; padding:.12rem .6rem; margin:.15rem .25rem 0 0;
+  border:1px solid var(--line); border-radius:99px; white-space:nowrap;
+  background:var(--box); }
+.lastcheck { display:inline-block; margin:.5rem 0 .3rem;
+  padding:.45rem 1rem; border-radius:99px; font-weight:600; font-size:.92rem;
+  background:color-mix(in srgb, var(--accent) 11%, transparent);
   color:var(--accent); }
-.searchbar { margin:.8rem 0; display:flex; align-items:center; gap:.8rem; }
-.searchbar input { flex:1; max-width:420px; padding:.45rem .7rem;
-  border:1px solid var(--line); border-radius:8px; background:var(--bg);
+.searchbar { margin:.9rem 0 1.1rem; display:flex; align-items:center;
+  gap:.8rem; }
+.searchbar input { flex:1; max-width:430px; padding:.55rem .85rem;
+  border:1px solid var(--line); border-radius:10px; background:var(--card);
   color:var(--fg); font-size:1em; }
-details.rowedit { margin-top:.3rem; }
-details.rowedit summary { font-size:.85em; }
-details.rowedit form { max-width:230px; padding:.7rem; }
+.searchbar input:focus { outline:2px solid
+  color-mix(in srgb, var(--accent) 45%, transparent); border-color:transparent; }
+details.rowedit { margin:0; }
+details.rowedit summary { font-size:.86rem; }
+details.rowedit form { max-width:250px; padding:.75rem; }
 button.primary { background:var(--accent); color:#fff; border:none;
-  padding:.5rem 1rem; border-radius:8px; font-size:1em; cursor:pointer; }
+  padding:.55rem 1.1rem; border-radius:9px; font-size:.95em; font-weight:600;
+  cursor:pointer; }
+button.primary:hover { filter:brightness(1.08); }
 button.primary:disabled { opacity:.5; cursor:wait; }
 button.link { background:none; border:none; padding:0; cursor:pointer;
-  font-size:.85em; text-decoration:underline; color:var(--accent); }
+  font-size:.86rem; color:var(--accent); }
+button.link:hover { text-decoration:underline; }
 button.link.danger { color:var(--up); }
-#status { margin-left:.8rem; color:var(--muted); }
-details { margin-top:1rem; }
+#status { margin-left:.8rem; color:var(--muted); font-size:.9rem; }
+.controls details { margin-top:.7rem; }
 details summary { cursor:pointer; color:var(--accent); }
-details form { display:grid; gap:.6rem; max-width:440px; margin-top:.8rem;
-  padding:1rem; border:1px solid var(--line); border-radius:10px; }
-details label { display:grid; gap:.15rem; font-size:.9em; }
-details input { padding:.4rem .5rem; border:1px solid var(--line);
-  border-radius:6px; background:var(--bg); color:var(--fg); font-size:1em; }
+details form { display:grid; gap:.6rem; max-width:460px; margin-top:.8rem;
+  padding:1rem 1.1rem; border:1px solid var(--line); border-radius:12px;
+  background:var(--card); }
+details label { display:grid; gap:.18rem; font-size:.88em; }
+details input { padding:.45rem .55rem; border:1px solid var(--line);
+  border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
+.intro { color:var(--muted); font-size:.86rem; max-width:70ch; }
 </style></head><body>
 <h1>Accor price watch</h1>
-<p>Watching 10 hotel(s) · 2 adults · flexible rates only</p>
+<div class="hmeta">Watching 10 hotel(s) · 2 adults · flexible rates only</div>
 <div class="lastcheck">🕑 Last checked: 2026-07-15 00:12:52 (fetched in 11s)</div>
-<p><small>1 EUR ≈ ₹109.07 (live rate; INR figures are approximate conversions of logged-out member prices)<br>
-On a drop: <strong>book the new rate first, then cancel the old booking</strong>.
-Dashed line in the trend = your booked price. The "points" line under each
-rate shows the max points usable (2,000-pt steps, value can't exceed the stay
-total) + the cash left to pay.</small></p>
+<p class="intro">1 EUR ≈ ₹109.07 (live rate; INR figures are approximate conversions of logged-out member prices)<br>
+On a drop: <b>book the new rate first, then cancel the old booking</b>.
+Dashed line in the trend = your booked price. 💠 lines show the max points
+usable (2,000-pt steps) + the cash left to pay.</p>
 
 
 <div class="searchbar">
@@ -73,124 +110,171 @@ total) + the cash left to pay.</small></p>
 </div>
 <script>
 function filterRows(q){q=q.trim().toLowerCase();let n=0;
-document.querySelectorAll('tbody tr').forEach(function(tr){
-  var show=!q||tr.textContent.toLowerCase().indexOf(q)>=0;
-  tr.style.display=show?'':'none'; if(show)n++;});
+document.querySelectorAll('.card').forEach(function(c){
+  var show=!q||c.textContent.toLowerCase().indexOf(q)>=0;
+  c.style.display=show?'':'none'; if(show)n++;});
 document.getElementById('rowcount').textContent=n;}
 </script>
-<table><thead><tr><th>Hotel</th><th>Booked</th>
-<th>Flexible</th><th>Flexible + breakfast</th>
-<th>vs booked</th><th>Trend</th><th></th>
-</tr></thead><tbody><tr>
-          <td><strong>ibis Amsterdam Centre Stopera</strong><br>
-              <small>Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
-              5 night(s) · booked</small><br><small>room: Standard Room with double bed</small><br><small class="pts">📅 cheaper start nearby: Sun 20 Sep · ₹97,059 (−₹15,291, same 5 nights)</small><br><small>📉 lowest tracked for your dates: ₹112,350 (14 Jul)</small><br><small class="pts">🧭 6-month floor: ₹71,032 (start 20 Dec, scanned 07-14) — your dates are +58% over floor</small>
-              </td>
-          <td>₹111,977<br><small>room only</small></td>
-          <td><strong>₹112,350</strong> <small>member</small><br><small>₹124,834 standard</small><br><small class="pts">points: 50,000 pts + €30.08 ≈ ₹3,280 to pay</small></td>
-          <td><strong>₹130,811</strong> <small>member</small><br><small>₹145,584 standard</small><br><small class="pts">points: 58,000 pts + €39.33 ≈ ₹4,290 to pay</small></td>
-          <td><span class="badge same">≈ same</span></td>
-          <td><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="0.0,2.0 120.0,2.0" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/3044?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Swissôtel Amsterdam</strong><br>
-              <small>Amsterdam · Wed 16 Sep → Sat 19 Sep 2026 ·
-              3 night(s) · booked</small>
-              </td>
-          <td>₹118,712<br><small>🍳 incl. breakfast</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-16&nights=3&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Aparthotel Adagio Amsterdam City South</strong><br>
-              <small>Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
-              5 night(s) · booked</small>
-              </td>
-          <td>₹85,376<br><small>🍳 incl. breakfast</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/B355?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>ibis budget Brugge Centrum Station</strong><br>
-              <small>Brugge · Mon 21 Sep → Thu 24 Sep 2026 ·
-              3 night(s) · booked</small>
-              </td>
-          <td>₹27,447<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=3&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>ibis Köln Am Dom</strong><br>
-              <small>Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
-              2 night(s) · booked</small>
-              </td>
-          <td>₹27,494<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/0739?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Mondial am Dom Cologne - MGallery</strong><br>
-              <small>Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
-              2 night(s) · booked</small>
-              </td>
-          <td>₹39,929<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/1306?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>ibis Schiphol Amsterdam Airport</strong><br>
-              <small>Amsterdam · Sat 26 Sep → Sun 27 Sep 2026 ·
-              1 night(s) · booked</small>
-              </td>
-          <td>₹12,025<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/0649?dateIn=2026-09-26&nights=1&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Sofitel Legend The Grand Amsterdam</strong><br>
-              <small>Amsterdam · Wed 16 Sep → Thu 17 Sep 2026 ·
-              1 night(s) · booked</small>
-              </td>
-          <td>₹74,729<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/2783?dateIn=2026-09-16&nights=1&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Avista Hideaway Patong Resort & Spa Phuket - MGallery Collection</strong><br>
-              <small>Phuket · Wed 16 Sep → Mon 21 Sep 2026 ·
-              5 night(s) · booked</small>
-              </td>
-          <td>₹58,054<br><small>room only</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/A245?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open ↗</a></td>
-        </tr><tr>
-          <td><strong>Mercure Amsterdam City Hotel</strong><br>
-              <small> · Wed 16 Sep → Mon 21 Sep 2026 ·
-              5 night(s) · not booked — watching</small>
-              </td>
-          <td><small>–</small></td>
-          <td><small>not yet checked</small></td>
-          <td><small>–</small></td>
-          <td><span class="badge err">no data</span></td>
-          <td></td>
-          <td><a href="https://all.accor.com/booking/en/accor/hotel/1244?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open ↗</a></td>
-        </tr></tbody></table>
+<div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">ibis Amsterdam Centre Stopera</div>
+      <div class="hmeta">Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
+        5 night(s) · booked</div>
+      <div class="hmeta">room: Standard Room with double bed</div>
+    </div>
+    <div class="cright"><span class="badge same">≈ same</span><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="0.0,2.0 120.0,2.0" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹111,977</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹112,350</div><div class="tiny">member · ₹124,834 standard</div><div class="tiny pts">💠 50,000 pts + €30.08 ≈ ₹3,280</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹130,811</div><div class="tiny">member · ₹145,584 standard</div><div class="tiny pts">💠 58,000 pts + €39.33 ≈ ₹4,290</div></div></div>
+  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹97,059 <b>(−₹15,291)</b></span><span>📉 lowest tracked: ₹112,350 (14 Jul)</span><span>🧭 6-mo floor: ₹71,032 (start 20 Dec) — your dates <b>+58%</b></span></div>
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/3044?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Swissôtel Amsterdam</div>
+      <div class="hmeta">Amsterdam · Wed 16 Sep → Sat 19 Sep 2026 ·
+        3 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹118,712</div><div class="tiny">🍳 incl. breakfast</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-16&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Aparthotel Adagio Amsterdam City South</div>
+      <div class="hmeta">Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
+        5 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹85,376</div><div class="tiny">🍳 incl. breakfast</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/B355?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">ibis budget Brugge Centrum Station</div>
+      <div class="hmeta">Brugge · Mon 21 Sep → Thu 24 Sep 2026 ·
+        3 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹27,447</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">ibis Köln Am Dom</div>
+      <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
+        2 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹27,494</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/0739?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Mondial am Dom Cologne - MGallery</div>
+      <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
+        2 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹39,929</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/1306?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">ibis Schiphol Amsterdam Airport</div>
+      <div class="hmeta">Amsterdam · Sat 26 Sep → Sun 27 Sep 2026 ·
+        1 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹12,025</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/0649?dateIn=2026-09-26&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Sofitel Legend The Grand Amsterdam</div>
+      <div class="hmeta">Amsterdam · Wed 16 Sep → Thu 17 Sep 2026 ·
+        1 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹74,729</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/2783?dateIn=2026-09-16&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Avista Hideaway Patong Resort & Spa Phuket - MGallery Collection</div>
+      <div class="hmeta">Phuket · Wed 16 Sep → Mon 21 Sep 2026 ·
+        5 night(s) · booked</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹58,054</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/A245?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div><div class="card">
+  <div class="chead">
+    <div class="cinfo">
+      <div class="hname">Mercure Amsterdam City Hotel</div>
+      <div class="hmeta">Wed 16 Sep → Mon 21 Sep 2026 ·
+        5 night(s) · not booked — watching</div>
+      
+    </div>
+    <div class="cright"><span class="badge err">no data</span></div>
+  </div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval dim">not booked</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval dim">not yet checked</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval dim">–</div></div></div>
+  
+  <div class="cactions">
+    <a href="https://all.accor.com/booking/en/accor/hotel/1244?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
+    
+  </div>
+</div>
 
 </body></html>
