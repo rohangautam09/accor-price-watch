@@ -47,6 +47,19 @@ a:hover { text-decoration:underline; }
   white-space:nowrap; font-weight:600; }
 .prevrun { display:inline-block; margin-top:.35rem; padding:.15rem .55rem;
   border-radius:8px; font-size:.76rem; white-space:nowrap; }
+.changebar { display:flex; flex-direction:column; gap:.35rem;
+  margin:.4rem 0 .8rem; }
+.changebar.quiet { color:var(--muted); font-size:.86rem; }
+.ci { display:block; padding:.5rem .9rem; border-radius:10px;
+  font-size:.92rem; text-decoration:none; }
+.ci:hover { text-decoration:none; filter:brightness(1.05); }
+.ci.cidrop { background:color-mix(in srgb, var(--drop) 13%, transparent);
+  color:var(--drop); font-weight:650; }
+.ci.cidn { background:color-mix(in srgb, var(--drop) 7%, transparent);
+  color:var(--drop); }
+.ci.ciup { background:color-mix(in srgb, var(--up) 7%, transparent);
+  color:color-mix(in srgb, var(--up) 85%, var(--fg)); }
+.card { scroll-margin-top:1rem; }
 .d { font-size:.74rem; font-weight:650; vertical-align:2px;
   white-space:nowrap; }
 .d.dn { color:var(--drop); }
@@ -104,6 +117,7 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 <h1>Accor price watch</h1>
 <div class="hmeta">Watching 10 hotel(s) · 2 adults · flexible rates only</div>
 <div class="lastcheck">🕑 Last checked: 2026-07-17 12:20:51 (fetched in 28s)</div>
+<div class="changebar"><a class="ci cidrop" href="#hA245-2026-09-16">🔥 Avista Hideaway Patong Resort & Spa Phuket - MGallery Collection: ₹562 below your booked price (now ₹58,150)</a></div>
 <p class="intro">1 EUR ≈ ₹110.31 (live rate; INR figures are approximate conversions of logged-out member prices)<br>
 On a drop: <b>book the new rate first, then cancel the old booking</b>.
 Dashed line in the trend = your booked price. 💠 lines show the max points
@@ -122,7 +136,7 @@ document.querySelectorAll('.card').forEach(function(c){
   c.style.display=show?'':'none'; if(show)n++;});
 document.getElementById('rowcount').textContent=n;}
 </script>
-<div class="card">
+<div class="card" id="h3044-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">ibis Amsterdam Centre Stopera</div>
@@ -138,7 +152,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/3044?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="hA599-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Swissôtel Amsterdam</div>
@@ -154,7 +168,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-16&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="hB355-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Aparthotel Adagio Amsterdam City South</div>
@@ -170,7 +184,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/B355?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h5046-2026-09-21">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">ibis budget Brugge Centrum Station</div>
@@ -186,7 +200,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h0739-2026-09-24">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">ibis Köln Am Dom</div>
@@ -202,7 +216,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/0739?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h1306-2026-09-24">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Mondial am Dom Cologne - MGallery</div>
@@ -218,7 +232,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/1306?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h0649-2026-09-26">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">ibis Schiphol Amsterdam Airport</div>
@@ -234,7 +248,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/0649?dateIn=2026-09-26&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h2783-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Sofitel Legend The Grand Amsterdam</div>
@@ -250,7 +264,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/2783?dateIn=2026-09-16&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="hA245-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Avista Hideaway Patong Resort & Spa Phuket - MGallery Collection</div>
@@ -266,7 +280,7 @@ document.getElementById('rowcount').textContent=n;}
     <a href="https://all.accor.com/booking/en/accor/hotel/A245?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card">
+</div><div class="card" id="h1244-2026-09-16">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">Mercure Amsterdam City Hotel</div>
