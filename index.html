@@ -20,6 +20,9 @@ a:hover { text-decoration:underline; }
 .card { background:var(--card); border:1px solid var(--line);
   border-radius:16px; padding:1.05rem 1.2rem; margin-bottom:.85rem;
   box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.card.pinned { border-color:color-mix(in srgb, var(--accent) 45%,
+  var(--line)); box-shadow:0 1px 3px color-mix(in srgb, var(--accent) 18%,
+  transparent); }
 .chead { display:flex; justify-content:space-between; gap:1rem;
   align-items:flex-start; }
 .hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
@@ -163,16 +166,20 @@ function sortCards(m){
     drop:function(c){return parseFloat(c.dataset.diff||9e12);},
     orig:function(c){return parseInt(c.dataset.idx||0,10);}
   }[m];
-  cards.sort(function(a,b){return key(a)-key(b);});
+  cards.sort(function(a,b){
+    var pa=parseInt(b.dataset.pin||0,10)-parseInt(a.dataset.pin||0,10);
+    return pa || (key(a)-key(b));});
   cards.forEach(function(c){box.appendChild(c);});
 }
 document.addEventListener('DOMContentLoaded',function(){
   var i=0;
   document.querySelectorAll('#cards > .card').forEach(function(c){
     c.dataset.idx=i++;});
+  sortCards(document.getElementById('sortsel').value);
 });
 </script>
-<div id="cards"><div class="card" id="h3044-2026-09-16-5"
+<div id="cards"><div class="card"
+  id="h3044-2026-09-16-5" data-pin="0"
   data-score="29.6" data-price="137664"
   data-diff="27257">
   <div class="chead">
@@ -190,7 +197,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/3044?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="hA599-2026-09-16-3"
+</div><div class="card"
+  id="hA599-2026-09-16-3" data-pin="0"
   data-score="31.7" data-price="119149"
   data-diff="1596">
   <div class="chead">
@@ -208,7 +216,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-16&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="hB355-2026-09-16-5"
+</div><div class="card"
+  id="hB355-2026-09-16-5" data-pin="0"
   data-score="10.8" data-price="121786"
   data-diff="35610">
   <div class="chead">
@@ -226,7 +235,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/B355?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h5046-2026-09-21-3"
+</div><div class="card"
+  id="h5046-2026-09-21-3" data-pin="0"
   data-score="56.8" data-price="32627"
   data-diff="4923">
   <div class="chead">
@@ -244,7 +254,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h0739-2026-09-24-2"
+</div><div class="card"
+  id="h0739-2026-09-24-2" data-pin="0"
   data-score="59.1" data-price="30936"
   data-diff="3185">
   <div class="chead">
@@ -262,7 +273,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/0739?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h1306-2026-09-24-2"
+</div><div class="card"
+  id="h1306-2026-09-24-2" data-pin="0"
   data-score="50.7" data-price="55777"
   data-diff="15474">
   <div class="chead">
@@ -280,7 +292,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/1306?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h0649-2026-09-26-1"
+</div><div class="card"
+  id="h0649-2026-09-26-1" data-pin="0"
   data-score="35.5" data-price="14320"
   data-diff="2183">
   <div class="chead">
@@ -298,7 +311,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/0649?dateIn=2026-09-26&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="hA599-2026-09-18-3"
+</div><div class="card"
+  id="hA599-2026-09-18-3" data-pin="0"
   data-score="49.7" data-price="117031"
   data-diff="1558">
   <div class="chead">
@@ -316,7 +330,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-18&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h1453-2026-09-23-1"
+</div><div class="card"
+  id="h1453-2026-09-23-1" data-pin="0"
   data-score="70.3" data-price="11563"
   data-diff="-0">
   <div class="chead">
@@ -334,7 +349,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="https://all.accor.com/booking/en/accor/hotel/1453?dateIn=2026-09-23&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
-</div><div class="card" id="h5046-2026-09-21-2"
+</div><div class="card"
+  id="h5046-2026-09-21-2" data-pin="0"
   data-score="70.7" data-price="21916"
   data-diff="0">
   <div class="chead">
