@@ -79,6 +79,18 @@ a:hover { text-decoration:underline; }
 .same, .err { background:color-mix(in srgb, var(--muted) 14%, transparent);
   color:var(--muted); font-weight:500; }
 .controls { margin:1rem 0 .4rem; }
+.savingsbar { margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
+  background:color-mix(in srgb, var(--drop) 9%, var(--card));
+  border:1px solid color-mix(in srgb, var(--drop) 30%, var(--line)); }
+.savingsbar > span { margin-right:1.4rem; }
+.savingsbar summary { color:var(--drop); }
+table.ledger { border-collapse:collapse; width:100%; margin-top:.7rem;
+  font-size:.86rem; }
+table.ledger th, table.ledger td { text-align:left; padding:.35rem .6rem;
+  border-bottom:1px solid var(--line); white-space:nowrap; }
+table.ledger th { color:var(--muted); font-weight:600; font-size:.78rem;
+  text-transform:uppercase; letter-spacing:.05em; }
+td.savepos { color:var(--drop); font-weight:650; }
 .pointsbar { margin:1rem 0 .4rem; padding:.85rem 1.1rem;
   border:1px solid var(--line); border-radius:14px; background:var(--card); }
 .pointsbar > span { margin-right:1.5rem; white-space:nowrap; }
@@ -136,6 +148,7 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 On a drop: <b>book the new rate first, then cancel the old booking</b>.
 Dashed line in the trend = your booked price. 💠 lines show the max points
 usable (2,000-pt steps) + the cash left to pay.</p>
+
 
 
 <div class="searchbar">
