@@ -27,6 +27,20 @@ a:hover { text-decoration:underline; }
   align-items:flex-start; }
 .hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
 .hmeta { color:var(--muted); font-size:.84rem; margin-top:.1rem; }
+.stag { margin-left:.5rem; padding:.14rem .55rem; border-radius:99px;
+  font-size:.72rem; font-weight:600; vertical-align:2px; white-space:nowrap; }
+.stag.booked { background:color-mix(in srgb, var(--drop) 13%, transparent);
+  color:var(--drop); }
+.stag.track { background:color-mix(in srgb, var(--muted) 16%, transparent);
+  color:var(--muted); }
+.cov { margin-top:.6rem; padding:.5rem .8rem; border-radius:10px;
+  font-size:.9rem; }
+.cov.ok { background:color-mix(in srgb, var(--drop) 12%, transparent);
+  color:var(--drop); }
+.cov.short { background:color-mix(in srgb, var(--amber, #b8860b) 14%,
+  transparent); color:color-mix(in srgb, var(--up) 75%, var(--fg)); }
+details select { padding:.45rem .55rem; border:1px solid var(--line);
+  border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
 .apptag { margin-left:.5rem; padding:.14rem .55rem; border-radius:99px;
   font-size:.72rem; font-weight:600; vertical-align:2px; white-space:nowrap;
   background:color-mix(in srgb, var(--accent) 12%, transparent);
@@ -202,7 +216,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="29869">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">ibis Amsterdam Centre Stopera</div>
+      <div class="hname">ibis Amsterdam Centre Stopera<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
         5 night(s) · booked · 📍 1.0 km from centre</div>
       <div class="hmeta">room: Standard Room with double bed</div>
@@ -222,7 +236,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="7260">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 Swissôtel Amsterdam<span class="apptag">📱 8% app discount</span></div>
+      <div class="hname">📌 Swissôtel Amsterdam<span class="stag booked">✅ booked</span><span class="apptag">📱 8% app discount</span></div>
       <div class="hmeta">Amsterdam · Wed 16 Sep → Sat 19 Sep 2026 ·
         3 night(s) · booked · 📍 0.1 km from centre</div>
       <div class="hmeta">room: KGC</div>
@@ -242,7 +256,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="-235">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 Aparthotel Adagio Amsterdam City South</div>
+      <div class="hname">📌 Aparthotel Adagio Amsterdam City South<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
         5 night(s) · booked · 📍 6.2 km from centre</div>
       <div class="hmeta">room: Junior 1 bed apartment</div>
@@ -262,7 +276,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="2641">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">ibis budget Brugge Centrum Station</div>
+      <div class="hname">ibis budget Brugge Centrum Station<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Brugge · Mon 21 Sep → Thu 24 Sep 2026 ·
         3 night(s) · booked · 📍 1.5 km from centre</div>
       <div class="hmeta">room: Double - room with 1 double bed for up to 2 people.</div>
@@ -282,7 +296,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="3178">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 ibis Köln Am Dom</div>
+      <div class="hname">📌 ibis Köln Am Dom<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
         2 night(s) · booked · 📍 0.1 km from centre</div>
       <div class="hmeta">room: Standard Room with one double bed</div>
@@ -302,7 +316,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="19649">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">Mondial am Dom Cologne - MGallery</div>
+      <div class="hname">Mondial am Dom Cologne - MGallery<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
         2 night(s) · booked · 📍 0.2 km from centre</div>
       <div class="hmeta">room: Standard Room</div>
@@ -322,7 +336,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="1762">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 ibis Schiphol Amsterdam Airport</div>
+      <div class="hname">📌 ibis Schiphol Amsterdam Airport<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Amsterdam · Sat 26 Sep → Sun 27 Sep 2026 ·
         1 night(s) · booked · 📍 8.5 km from centre</div>
       <div class="hmeta">room: Room with 1 double bed</div>
@@ -342,7 +356,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="-6">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 ibis Antwerpen Centrum</div>
+      <div class="hname">📌 ibis Antwerpen Centrum<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Antwerp · Wed 23 Sep → Thu 24 Sep 2026 ·
         1 night(s) · booked</div>
       <div class="hmeta">room: Room with 2 single beds equipped with the new bedding</div>
@@ -362,7 +376,7 @@ document.addEventListener('DOMContentLoaded',function(){
   data-diff="-359">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">📌 ibis budget Brugge Centrum Station</div>
+      <div class="hname">📌 ibis budget Brugge Centrum Station<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Mon 21 Sep → Wed 23 Sep 2026 ·
         2 night(s) · booked</div>
       <div class="hmeta">room: Double - room with 1 double bed for up to 2 people.</div>
