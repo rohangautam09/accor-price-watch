@@ -379,22 +379,71 @@ def load_history():
 PUBLISH_DIR = BASE / "publish"
 
 
+PAGES_REPO = "rohangautam09/accor-price-watch"
+PAGES_WORKFLOW = "pages-check.yml"
+
+
 def publish_public(history, fx):
-    """Write the sanitized public dashboard into publish/ and push it to
-    GitHub Pages if the folder is a git repo with a remote. Best-effort."""
+    """Publish this run to the GitHub Pages dashboard — the same page the
+    cloud checker builds, so a check on either side updates one site.
+    Booking refs are masked there. Best-effort; never blocks a local run."""
     if not PUBLISH_DIR.is_dir():
         return
+    # everything in publish/ is generated, and the cloud checker pushes to
+    # the same branch — so start from the remote state instead of merging
+    g = ["git", "-C", str(PUBLISH_DIR)]
+    try:
+        subprocess.run(g + ["rebase", "--abort"], capture_output=True,
+                       timeout=30)
+        subprocess.run(g + ["fetch", "-q", "origin"], capture_output=True,
+                       timeout=60)
+        subprocess.run(g + ["reset", "--hard", "-q", "origin/main"],
+                       capture_output=True, timeout=30)
+    except Exception:
+        pass
+    # share one history with the cloud checker so trends and since-last-run
+    # deltas are continuous no matter which side ran
+    shared = PUBLISH_DIR / "history_public.json"
+    try:
+        runs = json.loads(shared.read_text()) if shared.exists() else []
+    except ValueError:
+        runs = []
+    latest = history[-1] if history else None
+    if latest:
+        stamps = {r.get("checked_at") for r in runs}
+        if latest.get("checked_at") not in stamps:
+            prev = runs[-1] if runs else None
+            if prev:
+                pm = {h.get("uid", h["code"]): h
+                      for h in prev.get("hotels", [])}
+                at = prev.get("checked_at", prev["date"])
+                for r in latest["hotels"]:
+                    p = pm.get(r.get("uid", r["code"]))
+                    if p and "inr_member" in p and "inr_member" in r:
+                        r.setdefault("prev", {
+                            "at": at, "inr_member": p["inr_member"],
+                            "inr_bb_member": p.get("inr_bb_member"),
+                            "inr_nf_member": p.get("inr_nf_member"),
+                            "inr_nf_bb_member": p.get("inr_nf_bb_member")})
+            runs.append(latest)
+            runs = runs[-60:]
+            shared.write_text(json.dumps(runs, indent=1, ensure_ascii=False))
+    for name in ("render.py", "check.py", "savings.json", "rooms_cache.json"):
+        src = BASE / name
+        if src.exists():
+            (PUBLISH_DIR / name).write_text(src.read_text())
     (PUBLISH_DIR / "index.html").write_text(
-        render_page(CONFIG, history, fx, public=True))
+        render_page(CONFIG, runs or history, fx, cloud=True,
+                    repo=PAGES_REPO, workflow=PAGES_WORKFLOW))
     if not (PUBLISH_DIR / ".git").exists():
         return
     try:
-        g = ["git", "-C", str(PUBLISH_DIR)]
         subprocess.run(g + ["add", "-A"], capture_output=True, timeout=30)
         subprocess.run(g + ["commit", "-m",
-                            f"update {dt.datetime.now():%Y-%m-%d %H:%M}"],
+                            f"prices from the Mac "
+                            f"{dt.datetime.now():%Y-%m-%d %H:%M}"],
                        capture_output=True, timeout=30)
-        subprocess.run(g + ["push"], capture_output=True, timeout=60)
+        subprocess.run(g + ["push", "-q"], capture_output=True, timeout=60)
     except Exception:
         pass
     # keep the private code repo (cloud morning-alert) in sync too, so
