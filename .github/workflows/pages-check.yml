@@ -86,12 +86,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # exactly one notification per run: create the issue and leave
+          # it alone (closing or commenting would each send another email)
           URL=$(gh issue create --repo "$GITHUB_REPOSITORY" \
+                  --label "$([ "$(cat has_drops.txt)" = yes ] && echo drop || echo routine)" \
                   --title "$(cat email_subject.txt)" \
                   --body-file email_body.md)
           echo "sent: $URL"
-          # keep the issue list tidy: only real drops stay open
-          if [ "$(cat has_drops.txt)" != "yes" ]; then
-            gh issue close "$URL" --repo "$GITHUB_REPOSITORY" \
-              --comment "auto-closed: routine check" || true
-          fi
+
+      - name: tidy up old routine issues (deleting never emails)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          KEEP=$(gh issue list --repo "$GITHUB_REPOSITORY" --label routine \
+                   --state all --limit 1 --json number --jq '.[0].number')
+          for N in $(gh issue list --repo "$GITHUB_REPOSITORY" --label routine \
+                       --state all --limit 100 --json number --jq '.[].number'); do
+            [ "$N" = "$KEEP" ] && continue
+            ID=$(gh api "repos/$GITHUB_REPOSITORY/issues/$N" --jq .node_id)
+            gh api graphql -f query='mutation($id:ID!){deleteIssue(input:{issueId:$id}){clientMutationId}}' \
+              -f id="$ID" >/dev/null 2>&1 \
+              && echo "deleted #$N" || echo "could not delete #$N"
+          done
