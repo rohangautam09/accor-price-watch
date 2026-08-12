@@ -46,7 +46,7 @@ jobs:
           rm -f config.json
           git config user.name "accor-bot"
           git config user.email "actions@github.com"
-          git add index.html history_public.json alert_state.json status.json
+          git add -A
           git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
           git pull --rebase -q || true
           git push
