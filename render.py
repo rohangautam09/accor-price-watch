@@ -225,7 +225,8 @@ def render_page(config, history, fx, interactive=False, public=False,
         lines = "".join(
             f'<tr><td>{dt.date.fromisoformat(e["date"]).strftime("%d %b")}</td>'
             f'<td>{e["name"][:38]}</td>'
-            f'<td><small>{e["from"]} → {e["to"]}</small></td>'
+            f'<td><small>{mask_ref(e["from"]) if cloud else e["from"]} → '
+            f'{mask_ref(e["to"]) if cloud else e["to"]}</small></td>'
             f'<td>€{e["old_eur"]:,.2f} → €{e["new_eur"]:,.2f}</td>'
             f'<td class="{"savepos" if e["saved_eur"] > 0 else ""}">'
             f'{"−" if e["saved_eur"] > 0 else ""}'
