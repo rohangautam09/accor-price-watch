@@ -1,0 +1,93 @@
+{
+ "3044": {
+  "DBC": "Standard Room with double bed",
+  "TWC": "Room with twin beds with the new Sweet bed by ibis",
+  "DBCRVZ": "Premium Room with canal view and double bed with the new Sweet bed by ibis",
+  "DBCRV": "Room with Double Bed and view of a typical Amsterdam Canal",
+  "_gps": [
+   52.369905,
+   4.907566
+  ]
+ },
+ "A599": {
+  "KGA": "Classic Room Double",
+  "_gps": [
+   52.373403,
+   4.893462
+  ],
+  "TWD": "Classic Room Twin",
+  "KGC": "Premium Room King",
+  "TWC": "Premium Room Twin",
+  "DBCOV": "Swiss Select King",
+  "SKE": "Junior Suite",
+  "SLC": "Junior Suite Balcony",
+  "SKA": "City View Suite",
+  "SLB": "Signature City View Suite"
+ },
+ "B355": {
+  "CA2A": "Junior 1 bed apartment",
+  "_gps": [
+   52.318296,
+   4.871313
+  ]
+ },
+ "5046": {
+  "DBD": "Double - room with 1 double bed for up to 2 people.",
+  "_gps": [
+   51.19644,
+   3.21895
+  ]
+ },
+ "0739": {
+  "DBC": "Standard Room with one double bed",
+  "_gps": [
+   50.942563,
+   6.957725
+  ]
+ },
+ "1306": {
+  "QED": "Standard Room",
+  "_gps": [
+   50.94009,
+   6.960014
+  ]
+ },
+ "0649": {
+  "DBC": "Room with 1 double bed",
+  "_gps": [
+   52.325325,
+   4.795116
+  ]
+ },
+ "2783": {
+  "QEB": "SUPERIOR ROOM - 1 Queen bed - GARDEN, COURTYARD OR CITY VIEW",
+  "_gps": [
+   52.371132,
+   4.89531
+  ]
+ },
+ "A245": {
+  "KGB": "Deluxe Room, Garden View, 1 King Bed & 1 Sofa Bed",
+  "_gps": [
+   7.881189,
+   98.278166
+  ]
+ },
+ "1244": {
+  "DBA": "Double Classic",
+  "_gps": [
+   52.335579,
+   4.913228
+  ]
+ },
+ "1453": {
+  "DBB": "Superior room with 1 double bed",
+  "DBC": "Room with 1 double bed equipped with the new bedding",
+  "TWC": "Room with 2 single beds equipped with the new bedding",
+  "DBCH": "Reduced mobility room with 1 double bed",
+  "_gps": [
+   51.214633,
+   4.410914
+  ]
+ }
+}

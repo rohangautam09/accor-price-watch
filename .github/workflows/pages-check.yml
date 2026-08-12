@@ -1,0 +1,47 @@
+name: pages-check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: install playwright
+        run: pip install --quiet playwright
+      - name: cache the browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('requirements.txt') }}-v2
+      - name: install the browser
+        run: playwright install chromium --only-shell
+      - name: write config from the encrypted secret
+        env:
+          ACCOR_CONFIG: ${{ secrets.ACCOR_CONFIG }}
+        run: printf '%s' "$ACCOR_CONFIG" > config.json
+      - name: fetch prices and build the dashboard
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python pages_build.py
+      - name: publish
+        run: |
+          rm -f config.json history.json
+          git config user.name "accor-bot"
+          git config user.email "actions@github.com"
+          git add index.html history_public.json
+          git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
+          git push
