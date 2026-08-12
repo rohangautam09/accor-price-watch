@@ -604,61 +604,72 @@ def render_page(config, history, fx, interactive=False, public=False,
 <div class="controls">
   <button id="checkbtn" class="primary" onclick="cloudRefresh()">↻ Refresh prices</button>
   <span id="status"></span>
-  <details><summary>set up the refresh button (once)</summary>
-    <div style="max-width:520px;font-size:.9em;color:var(--muted);
-                padding:.8rem 0">
-      Refreshing runs the checker on GitHub, which needs a token from your
-      account. Create a fine-grained token with <b>Actions: read &amp; write</b>
-      on <code>{repo}</code>, then paste it here — it is stored only in this
-      browser, never published.
-      <div style="margin-top:.6rem">
-        <input id="pat" type="password" placeholder="github_pat_…"
-               style="padding:.45rem .6rem;border:1px solid var(--line);
-                      border-radius:8px;background:var(--bg);color:var(--fg);
-                      min-width:260px">
-        <button class="link" onclick="savePat()">save token</button>
-        <button class="link danger" onclick="clearPat()">forget</button>
-      </div>
-    </div>
-  </details>
+  <div id="setup" class="setupbox" hidden>
+    <b>One-time setup for the refresh button</b>
+    <p style="margin:.4rem 0 .6rem">Refreshing runs the price checker on
+    GitHub's servers. GitHub needs a key to confirm it is really you, so:</p>
+    <ol style="margin:0 0 .7rem 1.1rem;padding:0">
+      <li><a href="https://github.com/settings/tokens/new?scopes=repo,workflow&amp;description=Accor%20price%20watch"
+             target="_blank">tap here to create the key</a> (the right
+          options are pre-ticked) — scroll down, tap
+          <b>Generate token</b>, then copy it</li>
+      <li>paste it below and tap <b>save</b></li>
+    </ol>
+    <input id="pat" type="password" placeholder="paste the key here"
+           autocomplete="off">
+    <button class="primary" onclick="savePat()">save</button>
+    <button class="link" onclick="document.getElementById('setup').hidden=true">
+      close</button>
+    <p style="margin:.7rem 0 0"><small>The key is stored only in this
+    browser and never published. Prefer not to?
+    <a href="https://github.com/{repo}/actions/workflows/{workflow}"
+       target="_blank">run the check on GitHub instead</a>.</small></p>
+  </div>
 </div>"""
         script = f"""
 <script>
 const REPO="{repo}", WF="{workflow}";
 function savePat(){{
   const v=document.getElementById('pat').value.trim();
-  if(v){{ localStorage.setItem('accor_pat', v);
-    document.getElementById('pat').value='';
-    alert('Token saved on this device. The Refresh button is ready.'); }}
+  if(!v){{ return; }}
+  localStorage.setItem('accor_pat', v);
+  document.getElementById('pat').value='';
+  document.getElementById('setup').hidden=true;
+  document.getElementById('status').textContent='Key saved — tap Refresh prices.';
 }}
-function clearPat(){{ localStorage.removeItem('accor_pat');
-  alert('Token removed from this device.'); }}
 async function cloudRefresh(){{
   const t=localStorage.getItem('accor_pat');
   const st=document.getElementById('status');
-  if(!t){{ st.textContent='Add your token once — see the setup link below.';
-    return; }}
+  if(!t){{ document.getElementById('setup').hidden=false;
+    st.textContent='One-time setup needed \u2193'; return; }}
   const btn=document.getElementById('checkbtn'); btn.disabled=true;
   const t0=Date.now();
-  st.textContent='Asking GitHub to fetch fresh prices…';
-  const r=await fetch(
-    'https://api.github.com/repos/'+REPO+'/actions/workflows/'+WF+'/dispatches',
-    {{method:'POST',headers:{{'Authorization':'Bearer '+t,
-      'Accept':'application/vnd.github+json'}},
-      body:JSON.stringify({{ref:'main'}})}});
+  st.textContent='Asking GitHub to fetch fresh prices\u2026';
+  let r;
+  try{{
+    r=await fetch('https://api.github.com/repos/'+REPO+'/actions/workflows/'+WF+'/dispatches',
+      {{method:'POST',headers:{{'Authorization':'Bearer '+t,
+        'Accept':'application/vnd.github+json'}},
+        body:JSON.stringify({{ref:'main'}})}});
+  }}catch(e){{ btn.disabled=false; st.textContent='Network error — try again.'; return; }}
+  if(r.status===401||r.status===403){{ btn.disabled=false;
+    localStorage.removeItem('accor_pat');
+    document.getElementById('setup').hidden=false;
+    st.textContent='That key was rejected — create a new one below.'; return; }}
   if(!r.ok){{ btn.disabled=false;
-    st.textContent='GitHub refused the token ('+r.status+'). Check it has Actions write access.';
-    return; }}
+    st.textContent='GitHub said '+r.status+' — try again in a minute.'; return; }}
   const started=document.getElementById('stamp').textContent;
   const poll=setInterval(async()=>{{
     const secs=Math.round((Date.now()-t0)/1000);
-    st.textContent='Fetching prices… '+secs+'s (page reloads when ready)';
+    st.textContent='Fetching live prices\u2026 '+secs+'s';
     if(secs>25){{
-      const html=await (await fetch(location.pathname+'?t='+Date.now())).text();
-      if(html.indexOf(started)<0){{ clearInterval(poll); location.reload(); }}
+      try{{
+        const html=await (await fetch(location.pathname+'?t='+Date.now())).text();
+        if(html.indexOf(started)<0){{ clearInterval(poll); location.reload(); }}
+      }}catch(e){{}}
     }}
-    if(secs>180){{ clearInterval(poll); btn.disabled=false;
-      st.textContent='Taking longer than usual — reload in a minute.'; }}
+    if(secs>240){{ clearInterval(poll); btn.disabled=false;
+      st.textContent='Still working — reload the page in a minute.'; }}
   }},5000);
 }}
 </script>"""
@@ -980,6 +991,12 @@ details label {{ display:grid; gap:.18rem; font-size:.88em; }}
 details input {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
 .intro {{ color:var(--muted); font-size:.86rem; max-width:70ch; }}
+.setupbox {{ margin-top:.8rem; padding:1rem 1.1rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); max-width:560px;
+  font-size:.9rem; }}
+.setupbox input {{ padding:.5rem .6rem; border:1px solid var(--line);
+  border-radius:8px; background:var(--bg); color:var(--fg); min-width:220px;
+  margin-right:.4rem; }}
 @media (max-width: 760px) {{
   body {{ padding:1.2rem .8rem 3rem; }}
   h1 {{ font-size:1.35rem; }}

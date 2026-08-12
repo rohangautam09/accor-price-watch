@@ -156,6 +156,12 @@ details label { display:grid; gap:.18rem; font-size:.88em; }
 details input { padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
 .intro { color:var(--muted); font-size:.86rem; max-width:70ch; }
+.setupbox { margin-top:.8rem; padding:1rem 1.1rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); max-width:560px;
+  font-size:.9rem; }
+.setupbox input { padding:.5rem .6rem; border:1px solid var(--line);
+  border-radius:8px; background:var(--bg); color:var(--fg); min-width:220px;
+  margin-right:.4rem; }
 @media (max-width: 760px) {
   body { padding:1.2rem .8rem 3rem; }
   h1 { font-size:1.35rem; }
@@ -184,15 +190,60 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 </style></head><body>
 <h1>Accor price watch</h1>
 <div class="hmeta">Watching 8 hotel(s) · 2 adults · flexible rates only</div>
-<div class="lastcheck">🕑 Last checked: <span id="stamp">2026-08-12 08:47:04 (fetched in 22s)</span></div>
+<div class="lastcheck">🕑 Last checked: <span id="stamp">2026-08-12 08:35:57+05:30</span></div>
 <div class="changebar quiet">😴 nothing moved more than ₹500 since the last run</div>
 <p class="intro">1 EUR ≈ ₹110.14 (live rate; INR figures are approximate conversions of logged-out member prices)<br>
 On a drop: <b>book the new rate first, then cancel the old booking</b>.
 Dashed line in the trend = your booked price. 💠 lines show the max points
 usable (2,000-pt steps) + the cash left to pay.</p>
 
+<div class="savingsbar">
+  <span>💰 Saved by rebooking: <strong>€9.35</strong>
+    ≈ <strong>₹1,030</strong></span>
+  <span><small>6 successful rebooking(s) ·
+    8 tracked</small></span>
+  <details><summary>see every rebooking</summary>
+    <table class="ledger"><thead><tr><th>Date</th><th>Hotel</th>
+    <th>Booking</th><th>Price</th><th>Saved</th></tr></thead>
+    <tbody><tr><td>04 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QH••••SS → QN••••XS</small></td><td>€784.34 → €854.65</td><td class="">€70.31 (₹-7,744)</td></tr><tr><td>03 Aug</td><td>Swissôtel Amsterdam</td><td><small>QN••••SJ → QN••••SM</small></td><td>€1,061.07 → €1,045.97</td><td class="savepos">−€15.10 (₹1,663)</td></tr><tr><td>03 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••ZB → QN••••SZ</small></td><td>€196.87 → €188.26</td><td class="savepos">−€8.61 (₹948)</td></tr><tr><td>28 Jul</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••VC → QN••••ZB</small></td><td>€199.47 → €196.87</td><td class="savepos">−€2.60 (₹286)</td></tr><tr><td>28 Jul</td><td>Swissôtel Amsterdam</td><td><small>QN••••WG → QN••••SJ</small></td><td>€1,069.93 → €1,061.07</td><td class="savepos">−€8.86 (₹976)</td></tr><tr><td>26 Jul</td><td>ibis Antwerpen Centrum</td><td><small>QN••••BB → QN••••LP</small></td><td>€105.25 → €105.25</td><td class="">€0.00</td></tr><tr><td>25 Jul</td><td>Swissôtel Amsterdam</td><td><small>QM••••FN → QN••••WG</small></td><td>€1,090.59 → €1,069.93</td><td class="savepos">−€20.66 (₹2,275)</td></tr><tr><td>15 Jul</td><td>ibis Amsterdam Centre Stopera</td><td><small>QM••••ZB → QM••••QJ</small></td><td>€1,028.72 → €1,004.89</td><td class="savepos">−€23.83 (₹2,625)</td></tr></tbody></table>
+  </details>
+</div>
 
+<div class="pointsbar">
+  <span>💠 ALL points — total: <strong>77,804</strong> <small class="pts">≈ ₹171,385</small></span>
+  <span>used in bookings: <strong>20,000</strong> <small class="pts">≈ ₹44,056</small></span>
+  <span>remaining: <strong>57,804</strong> <small class="pts">≈ ₹127,329</small></span>
+  <br><small>2,000 pts = €40 ≈ ₹4,406
+   · 1 pt ≈ ₹2.20
+  (rate refreshes on every price check)</small>
+  <div class="cov ok">✅ Your points cover every booked stay — 54,000 pts needed, 57,804 available (3,804 to spare). Cash still due at the hotels (taxes + sub-€40 remainders): <strong>€219.73 ≈ ₹24,201</strong><br><small>Plus <strong>€22.80 ≈ ₹2,511</strong> of flat city tax (Belgium) collected at the hotel — not in the Accor total, never payable with points.</small></div>
+</div>
 
+<div class="controls">
+  <button id="checkbtn" class="primary" onclick="cloudRefresh()">↻ Refresh prices</button>
+  <span id="status"></span>
+  <div id="setup" class="setupbox" hidden>
+    <b>One-time setup for the refresh button</b>
+    <p style="margin:.4rem 0 .6rem">Refreshing runs the price checker on
+    GitHub's servers. GitHub needs a key to confirm it is really you, so:</p>
+    <ol style="margin:0 0 .7rem 1.1rem;padding:0">
+      <li><a href="https://github.com/settings/tokens/new?scopes=repo,workflow&amp;description=Accor%20price%20watch"
+             target="_blank">tap here to create the key</a> (the right
+          options are pre-ticked) — scroll down, tap
+          <b>Generate token</b>, then copy it</li>
+      <li>paste it below and tap <b>save</b></li>
+    </ol>
+    <input id="pat" type="password" placeholder="paste the key here"
+           autocomplete="off">
+    <button class="primary" onclick="savePat()">save</button>
+    <button class="link" onclick="document.getElementById('setup').hidden=true">
+      close</button>
+    <p style="margin:.7rem 0 0"><small>The key is stored only in this
+    browser and never published. Prefer not to?
+    <a href="https://github.com/rohangautam09/accor-price-watch/actions/workflows/pages-check.yml"
+       target="_blank">run the check on GitHub instead</a>.</small></p>
+  </div>
+</div>
 <div class="searchbar">
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"
          oninput="filterRows(this.value)">
@@ -240,19 +291,19 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="cards"><div class="card pinned"
   id="hA599-2026-09-16-3" data-pin="1"
   data-pinrank="1"
-  data-score="31.7" data-price="124806"
+  data-score="49.7" data-price="124806"
   data-diff="9912">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">📌 Swissôtel Amsterdam<span class="stag booked">✅ booked</span><span class="apptag">📱 8% app discount</span></div>
       <div class="hmeta">Amsterdam · Wed 16 Sep → Sat 19 Sep 2026 ·
-        3 night(s) · booked · 📍 0.1 km from centre</div>
+        3 night(s) · booking QN••••SM · 📍 0.1 km from centre</div>
       <div class="hmeta">room: Premium Room King</div>
     </div>
-    <div class="cright"><span class="badge up">▲ ₹9,912 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹41,602: −20 · 0.1 km from centre: −0 · +95% over 6-mo floor: −18">★ 32/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="24.6" x2="120" y2="24.6" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,15.8 55.7,17.8 60.0,12.9 64.3,16.6 68.6,12.2 72.9,8.6 77.1,15.6 81.4,18.0 85.7,26.0 90.0,2.0 94.3,2.6 98.6,11.8 102.9,10.1 107.1,8.2 111.4,5.9 115.7,11.5 120.0,4.0" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge up">▲ ₹9,912 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹41,602: −20 · 0.1 km from centre: −0">★ 50/100</div></div>
   </div>
-  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹114,894</div><div class="tiny">€1,043.17 fixed · ₹ at today's rate</div><div class="tiny">🍳 incl. breakfast</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹113,888 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹130,307 standard</div><div class="tiny">€1,034.04</div><div class="tiny pts">💠 max 44,000 pts + €154.04 ≈ ₹16,966 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹124,806 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹142,866 standard</div><div class="tiny">€1,133.17</div><div class="tiny pts">💠 max 50,000 pts + €133.17 ≈ ₹14,667 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval dim">not offered</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval dim">not offered</div></div></div>
-  <div class="insights"><span>📱 8% app discount applied to member prices</span><span>📅 cheaper start: Fri 18 Sep · ₹105,070 <b>(−₹8,818)</b></span><span>📉 lowest tracked: ₹114,235 (03 Aug)</span><span>🧭 6-mo floor: ₹58,376 (start 04 Jan) — your dates <b>+95%</b></span></div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹114,894</div><div class="tiny">€1,043.17 fixed · ₹ at today's rate</div><div class="tiny pts">if paid with points: <b>46,000 pts</b> + €123.17 cash · booked with cash — would need rebooking</div><div class="tiny">🍳 incl. breakfast</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹113,888 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹130,307 standard</div><div class="tiny">€1,034.04</div><div class="tiny pts">💠 max 44,000 pts + €154.04 ≈ ₹16,966 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹124,806 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹142,866 standard</div><div class="tiny">€1,133.17</div><div class="tiny pts">💠 max 50,000 pts + €133.17 ≈ ₹14,667 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval dim">not offered</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval dim">not offered</div></div></div>
+  <div class="insights"><span>📱 8% app discount applied to member prices</span></div>
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/A599?dateIn=2026-09-16&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -260,19 +311,19 @@ document.addEventListener('DOMContentLoaded',function(){
 </div><div class="card pinned"
   id="hB355-2026-09-16-5" data-pin="1"
   data-pinrank="6"
-  data-score="32.2" data-price="93978"
+  data-score="40.5" data-price="93978"
   data-diff="77">
   <div class="chead">
     <div class="cinfo">
       <div class="hname">📌 Aparthotel Adagio Amsterdam City South<span class="stag track">👀 tracking</span></div>
       <div class="hmeta">Amsterdam · Wed 16 Sep → Mon 21 Sep 2026 ·
-        5 night(s) · booked · 📍 6.2 km from centre</div>
+        5 night(s) · booking QN••••XS · 📍 6.2 km from centre</div>
       <div class="hmeta">room: Junior 1 bed apartment</div>
     </div>
-    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹18,796: −13 · 6.2 km from centre: −25 · holding your booked price: +8 · +33% over 6-mo floor: −8">★ 32/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="25.7" x2="120" y2="25.7" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,4.9 55.7,2.0 60.0,16.8 64.3,17.0 68.6,16.4 72.9,25.6 77.1,25.7 81.4,25.7 85.7,25.8 90.0,25.9 94.3,26.0 98.6,25.9 102.9,25.9 107.1,25.7 111.4,25.8 115.7,25.7 120.0,25.7" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹18,796: −13 · 6.2 km from centre: −25 · holding your booked price: +8">★ 40/100</div></div>
   </div>
   <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹93,901</div><div class="tiny">€852.57 fixed · ₹ at today's rate</div><div class="tiny">🍳 incl. breakfast</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹78,113 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹86,211 standard</div><div class="tiny">€709.22</div><div class="tiny pts">💠 max 30,000 pts + €109.22 ≈ ₹12,030 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹93,978 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹103,838 standard</div><div class="tiny">€853.27</div><div class="tiny pts">💠 max 36,000 pts + €133.27 ≈ ₹14,678 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹68,941 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹76,020 standard</div><div class="tiny">€625.95</div><div class="tiny pts">💠 max 26,000 pts + €105.95 ≈ ₹11,669 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹84,806 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹93,647 standard</div><div class="tiny">€769.99</div><div class="tiny pts">💠 max 34,000 pts + €89.99 ≈ ₹9,911 to pay</div></div></div>
-  <div class="insights"><span>📅 your start date is the cheapest within ±7 days</span><span>📉 lowest tracked: ₹93,517 (05 Aug)</span><span>🧭 6-mo floor: ₹58,757 (start 19 Jul) — your dates <b>+33%</b></span></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/B355?dateIn=2026-09-16&nights=5&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -286,13 +337,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">ibis budget Brugge Centrum Station<span class="stag track">👀 tracking</span></div>
       <div class="hmeta">Brugge · Mon 21 Sep → Thu 24 Sep 2026 ·
-        3 night(s) · booked · 📍 1.5 km from centre</div>
+        3 night(s) · booking QF••••DR · 📍 1.5 km from centre</div>
       <div class="hmeta">room: Double - room with 1 double bed for up to 2 people.</div>
     </div>
-    <div class="cright"><span class="badge up">▲ ₹2,979 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹10,147: −7 · 1.5 km from centre: −6">★ 57/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,2.8 55.7,2.0 60.0,6.0 64.3,6.8 68.6,2.6 72.9,5.0 77.1,2.1 81.4,2.6 85.7,8.4 90.0,8.8 94.3,8.9 98.6,12.1 102.9,12.6 107.1,12.3 111.4,12.8 115.7,12.6 120.0,12.6" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge up">▲ ₹2,979 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹10,147: −7 · 1.5 km from centre: −6">★ 57/100</div></div>
   </div>
   <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹27,462</div><div class="tiny">€249.34 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹30,441 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹33,515 standard</div><div class="tiny">€276.39</div><div class="tiny pts">💠 max 12,000 pts + €36.39 ≈ ₹4,008 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹38,175 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹42,108 standard</div><div class="tiny">€346.61</div><div class="tiny pts">💠 max 16,000 pts + €26.61 ≈ ₹2,931 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹26,431 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹29,058 standard</div><div class="tiny">€239.97</div><div class="tiny pts">💠 max 10,000 pts + €39.97 ≈ ₹4,403 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹34,165 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹37,652 standard</div><div class="tiny">€310.20</div><div class="tiny pts">💠 max 14,000 pts + €30.20 ≈ ₹3,326 to pay</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹28,755 <b>(−₹1,686)</b></span><span>📉 lowest tracked: ₹30,397 (10 Aug)</span></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=3&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -306,13 +357,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">📌 ibis Köln Am Dom<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
-        2 night(s) · booked · 📍 0.1 km from centre</div>
+        2 night(s) · booking QK••••RL · 📍 0.1 km from centre</div>
       <div class="hmeta">room: Standard Room with one double bed</div>
     </div>
-    <div class="cright"><span class="badge up">▲ ₹3,311 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹15,565: −10 · 0.1 km from centre: −1">★ 59/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,10.2 55.7,7.7 60.0,8.7 64.3,9.0 68.6,7.9 72.9,8.7 77.1,6.8 81.4,6.8 85.7,5.2 90.0,5.7 94.3,5.8 98.6,5.5 102.9,5.5 107.1,2.0 111.4,10.0 115.7,9.8 120.0,9.2" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge up">▲ ₹3,311 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹15,565: −10 · 0.1 km from centre: −1">★ 59/100</div></div>
   </div>
-  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹27,819</div><div class="tiny">€252.58 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹31,130 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹34,589 standard</div><div class="tiny">€282.64</div><div class="tiny pts">💠 max 12,000 pts + €42.64 ≈ ₹4,697 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹37,835 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹42,081 standard</div><div class="tiny">€343.52</div><div class="tiny pts">💠 max 16,000 pts + €23.52 ≈ ₹2,591 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval dim">not offered</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval dim">not offered</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹23,426 <b>(−₹7,704)</b></span><span>📉 lowest tracked: ₹30,936 (26 Jul)</span></div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹27,819</div><div class="tiny">€252.58 fixed · ₹ at today's rate</div><div class="tiny pts">💠 12,000 pts applied — max reached · €12.58 cash</div><div class="tiny">room only</div><div class="tiny pts">− 12,000 pts (≈ ₹26,433)</div><div class="tiny">cash at hotel ≈ <b>₹1,386</b></div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹31,130 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹34,589 standard</div><div class="tiny">€282.64</div><div class="tiny pts">💠 max 12,000 pts + €42.64 ≈ ₹4,697 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹37,835 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹42,081 standard</div><div class="tiny">€343.52</div><div class="tiny pts">💠 max 16,000 pts + €23.52 ≈ ₹2,591 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval dim">not offered</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval dim">not offered</div></div></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/0739?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -326,13 +377,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">Mondial am Dom Cologne - MGallery<span class="stag track">👀 tracking</span></div>
       <div class="hmeta">Cologne · Thu 24 Sep → Sat 26 Sep 2026 ·
-        2 night(s) · booked · 📍 0.2 km from centre</div>
+        2 night(s) · booking QG••••LZ · 📍 0.2 km from centre</div>
       <div class="hmeta">room: Standard Room</div>
     </div>
-    <div class="cright"><span class="badge up">▲ ₹19,393 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹29,672: −20 · 0.2 km from centre: −1">★ 49/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,7.2 55.7,7.0 60.0,4.8 64.3,2.3 68.6,3.8 72.9,3.4 77.1,3.5 81.4,5.6 85.7,5.1 90.0,5.3 94.3,4.0 98.6,4.4 102.9,2.6 107.1,2.7 111.4,4.8 115.7,2.0 120.0,2.9" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge up">▲ ₹19,393 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹29,672: −20 · 0.2 km from centre: −1">★ 49/100</div></div>
   </div>
   <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹39,952</div><div class="tiny">€362.74 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹59,345 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹62,468 standard</div><div class="tiny">€538.82</div><div class="tiny pts">💠 max 24,000 pts + €58.82 ≈ ₹6,478 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹72,289 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹76,130 standard</div><div class="tiny">€656.34</div><div class="tiny pts">💠 max 30,000 pts + €56.34 ≈ ₹6,206 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹50,553 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹53,214 standard</div><div class="tiny">€458.99</div><div class="tiny pts">💠 max 20,000 pts + €58.99 ≈ ₹6,497 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹63,497 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹66,875 standard</div><div class="tiny">€576.52</div><div class="tiny pts">💠 max 26,000 pts + €56.52 ≈ ₹6,225 to pay</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 27 Sep · ₹32,969 <b>(−₹26,375)</b></span><span>📉 lowest tracked: ₹55,777 (26 Jul)</span></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/1306?dateIn=2026-09-24&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -346,13 +397,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">📌 ibis Schiphol Amsterdam Airport<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Amsterdam · Sat 26 Sep → Sun 27 Sep 2026 ·
-        1 night(s) · booked · 📍 8.5 km from centre</div>
+        1 night(s) · booking QM••••NT · 📍 8.5 km from centre</div>
       <div class="hmeta">room: Room with 1 double bed</div>
     </div>
-    <div class="cright"><span class="badge up">▲ ₹1,775 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹13,942: −9 · 8.5 km from centre: −25">★ 36/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="26.0" x2="120" y2="26.0" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,3.1 55.7,2.7 60.0,3.1 64.3,4.5 68.6,3.4 72.9,2.6 77.1,2.8 81.4,7.3 85.7,7.3 90.0,2.2 94.3,2.3 98.6,2.0 102.9,2.1 107.1,7.3 111.4,7.3 115.7,7.1 120.0,7.1" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge up">▲ ₹1,775 costlier</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹13,942: −9 · 8.5 km from centre: −25">★ 36/100</div></div>
   </div>
-  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹12,167</div><div class="tiny">€110.47 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹13,942 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹15,491 standard</div><div class="tiny">€126.59</div><div class="tiny pts">💠 max 4,000 pts + €46.59 ≈ ₹5,131 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹17,587 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹19,567 standard</div><div class="tiny">€159.68</div><div class="tiny pts">💠 max 6,000 pts + €39.68 ≈ ₹4,371 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹13,208 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹14,676 standard</div><div class="tiny">€119.92</div><div class="tiny pts">💠 max 4,000 pts + €39.92 ≈ ₹4,397 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹16,854 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹18,752 standard</div><div class="tiny">€153.02</div><div class="tiny pts">💠 max 6,000 pts + €33.02 ≈ ₹3,637 to pay</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹10,063 <b>(−₹3,879)</b></span><span>📉 lowest tracked: ₹13,922 (10 Aug)</span></div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹12,167</div><div class="tiny">€110.47 fixed · ₹ at today's rate</div><div class="tiny pts">💠 4,000 pts applied — max reached · €30.47 cash</div><div class="tiny">room only</div><div class="tiny pts">− 4,000 pts (≈ ₹8,811)</div><div class="tiny">cash at hotel ≈ <b>₹3,356</b></div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹13,942 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹15,491 standard</div><div class="tiny">€126.59</div><div class="tiny pts">💠 max 4,000 pts + €46.59 ≈ ₹5,131 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹17,587 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹19,567 standard</div><div class="tiny">€159.68</div><div class="tiny pts">💠 max 6,000 pts + €39.68 ≈ ₹4,371 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹13,208 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹14,676 standard</div><div class="tiny">€119.92</div><div class="tiny pts">💠 max 4,000 pts + €39.92 ≈ ₹4,397 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹16,854 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹18,752 standard</div><div class="tiny">€153.02</div><div class="tiny pts">💠 max 6,000 pts + €33.02 ≈ ₹3,637 to pay</div></div></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/0649?dateIn=2026-09-26&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -366,13 +417,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">📌 ibis Antwerpen Centrum<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Antwerp · Wed 23 Sep → Thu 24 Sep 2026 ·
-        1 night(s) · booked</div>
+        1 night(s) · booking QN••••LP</div>
       <div class="hmeta">room: Room with 2 single beds equipped with the new bedding</div>
     </div>
-    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹11,597: −8 · holding your booked price: +8">★ 70/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="3.4" x2="120" y2="3.4" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,8.3 55.7,3.0 60.0,22.1 64.3,26.0 68.6,11.8 72.9,2.0 77.1,4.8 81.4,4.8 85.7,5.3 90.0,10.9 94.3,12.4 98.6,8.4 102.9,9.0 107.1,4.3 111.4,5.5 115.7,2.6 120.0,2.6" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹11,597: −8 · holding your booked price: +8">★ 70/100</div></div>
   </div>
-  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹11,592</div><div class="tiny">€105.25 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹11,597 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹12,798 standard</div><div class="tiny">€105.29</div><div class="tiny pts">💠 max 4,000 pts + €25.29 ≈ ₹2,786 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹15,166 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹16,764 standard</div><div class="tiny">€137.70</div><div class="tiny pts">💠 max 6,000 pts + €17.70 ≈ ₹1,950 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹10,516 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹11,597 standard</div><div class="tiny">€95.48</div><div class="tiny pts">💠 max 4,000 pts + €15.48 ≈ ₹1,705 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹14,086 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹15,563 standard</div><div class="tiny">€127.89</div><div class="tiny pts">💠 max 6,000 pts + €7.89 ≈ ₹869 to pay</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹9,019 <b>(−₹2,578)</b></span><span>📉 lowest tracked: ₹11,461 (29 Jul)</span></div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹11,592</div><div class="tiny">€105.25 fixed · ₹ at today's rate</div><div class="tiny pts">💠 4,000 pts applied — max reached · €25.25 cash + €6.00 city tax at hotel</div><div class="tiny">room only</div><div class="tiny pts">− 4,000 pts (≈ ₹8,811)</div><div class="tiny">cash at hotel ≈ <b>₹2,781</b></div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹11,597 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹12,798 standard</div><div class="tiny">€105.29</div><div class="tiny pts">💠 max 4,000 pts + €25.29 ≈ ₹2,786 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹15,166 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹16,764 standard</div><div class="tiny">€137.70</div><div class="tiny pts">💠 max 6,000 pts + €17.70 ≈ ₹1,950 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹10,516 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹11,597 standard</div><div class="tiny">€95.48</div><div class="tiny pts">💠 max 4,000 pts + €15.48 ≈ ₹1,705 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹14,086 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹15,563 standard</div><div class="tiny">€127.89</div><div class="tiny pts">💠 max 6,000 pts + €7.89 ≈ ₹869 to pay</div></div></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/1453?dateIn=2026-09-23&nights=1&compositions=2" target="_blank">open on Accor ↗</a>
     
@@ -386,17 +437,63 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="cinfo">
       <div class="hname">📌 ibis budget Brugge Centrum Station<span class="stag booked">✅ booked</span></div>
       <div class="hmeta">Mon 21 Sep → Wed 23 Sep 2026 ·
-        2 night(s) · booked</div>
+        2 night(s) · booking QN••••SZ</div>
       <div class="hmeta">room: Double - room with 1 double bed for up to 2 people.</div>
     </div>
-    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:20)</div><div class="score" title="price/night ₹10,197: −7 · holding your booked price: +8">★ 71/100</div><div class="trend"><svg width="120" height="28" style="vertical-align:middle"><line x1="0" y1="20.8" x2="120" y2="20.8" stroke="var(--muted)" stroke-dasharray="3,3"/><polyline points="51.4,4.2 55.7,2.0 60.0,13.2 64.3,15.2 68.6,13.1 72.9,11.6 77.1,2.3 81.4,3.7 85.7,21.8 90.0,22.6 94.3,22.8 98.6,23.6 102.9,25.1 107.1,24.4 111.4,26.0 115.7,25.6 120.0,25.6" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg></div></div>
+    <div class="cright"><span class="badge same">≈ same</span><div class="prevrun same">▲▼ vs last run (08-12 08:33)</div><div class="score" title="price/night ₹10,197: −7 · holding your booked price: +8">★ 71/100</div></div>
   </div>
-  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹20,735</div><div class="tiny">€188.26 fixed · ₹ at today's rate</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹20,393 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹22,453 standard</div><div class="tiny">€185.16</div><div class="tiny pts">💠 max 8,000 pts + €25.16 ≈ ₹2,771 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹25,549 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹28,182 standard</div><div class="tiny">€231.97</div><div class="tiny pts">💠 max 10,000 pts + €31.97 ≈ ₹3,521 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹18,539 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹20,393 standard</div><div class="tiny">€168.32</div><div class="tiny pts">💠 max 8,000 pts + €8.32 ≈ ₹917 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹23,695 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹26,122 standard</div><div class="tiny">€215.14</div><div class="tiny pts">💠 max 10,000 pts + €15.14 ≈ ₹1,667 to pay</div></div></div>
-  <div class="insights"><span>📅 cheaper start: Sun 20 Sep · ₹18,212 <b>(−₹2,181)</b></span><span>📉 lowest tracked: ₹20,363 (10 Aug)</span></div>
+  <div class="prices"><div class="pbox"><div class="plabel">Booked</div><div class="pval">₹20,735</div><div class="tiny">€188.26 fixed · ₹ at today's rate</div><div class="tiny pts">if paid with points: <b>8,000 pts</b> + €28.26 cash + €16.80 city tax at hotel · booked with cash — would need rebooking</div><div class="tiny">room only</div></div><div class="pbox"><div class="plabel">Flexible</div><div class="pval">₹20,393 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹22,453 standard</div><div class="tiny">€185.16</div><div class="tiny pts">💠 max 8,000 pts + €25.16 ≈ ₹2,771 to pay</div></div><div class="pbox"><div class="plabel">Flexible + breakfast</div><div class="pval">₹25,549 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹28,182 standard</div><div class="tiny">€231.97</div><div class="tiny pts">💠 max 10,000 pts + €31.97 ≈ ₹3,521 to pay</div></div><div class="pbox"><div class="plabel">Non-flexible</div><div class="pval">₹18,539 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹20,393 standard</div><div class="tiny">€168.32</div><div class="tiny pts">💠 max 8,000 pts + €8.32 ≈ ₹917 to pay</div></div><div class="pbox"><div class="plabel">Non-flex + breakfast</div><div class="pval">₹23,695 <span class="d sm">＝ same</span></div><div class="tiny">member · ₹26,122 standard</div><div class="tiny">€215.14</div><div class="tiny pts">💠 max 10,000 pts + €15.14 ≈ ₹1,667 to pay</div></div></div>
+  
   <div class="cactions">
     <a href="https://all.accor.com/booking/en/accor/hotel/5046?dateIn=2026-09-21&nights=2&compositions=2" target="_blank">open on Accor ↗</a>
     
   </div>
 </div></div>
 
+<script>
+const REPO="rohangautam09/accor-price-watch", WF="pages-check.yml";
+function savePat(){
+  const v=document.getElementById('pat').value.trim();
+  if(!v){ return; }
+  localStorage.setItem('accor_pat', v);
+  document.getElementById('pat').value='';
+  document.getElementById('setup').hidden=true;
+  document.getElementById('status').textContent='Key saved — tap Refresh prices.';
+}
+async function cloudRefresh(){
+  const t=localStorage.getItem('accor_pat');
+  const st=document.getElementById('status');
+  if(!t){ document.getElementById('setup').hidden=false;
+    st.textContent='One-time setup needed ↓'; return; }
+  const btn=document.getElementById('checkbtn'); btn.disabled=true;
+  const t0=Date.now();
+  st.textContent='Asking GitHub to fetch fresh prices…';
+  let r;
+  try{
+    r=await fetch('https://api.github.com/repos/'+REPO+'/actions/workflows/'+WF+'/dispatches',
+      {method:'POST',headers:{'Authorization':'Bearer '+t,
+        'Accept':'application/vnd.github+json'},
+        body:JSON.stringify({ref:'main'})});
+  }catch(e){ btn.disabled=false; st.textContent='Network error — try again.'; return; }
+  if(r.status===401||r.status===403){ btn.disabled=false;
+    localStorage.removeItem('accor_pat');
+    document.getElementById('setup').hidden=false;
+    st.textContent='That key was rejected — create a new one below.'; return; }
+  if(!r.ok){ btn.disabled=false;
+    st.textContent='GitHub said '+r.status+' — try again in a minute.'; return; }
+  const started=document.getElementById('stamp').textContent;
+  const poll=setInterval(async()=>{
+    const secs=Math.round((Date.now()-t0)/1000);
+    st.textContent='Fetching live prices… '+secs+'s';
+    if(secs>25){
+      try{
+        const html=await (await fetch(location.pathname+'?t='+Date.now())).text();
+        if(html.indexOf(started)<0){ clearInterval(poll); location.reload(); }
+      }catch(e){}
+    }
+    if(secs>240){ clearInterval(poll); btn.disabled=false;
+      st.textContent='Still working — reload the page in a minute.'; }
+  },5000);
+}
+</script>
 </body></html>
