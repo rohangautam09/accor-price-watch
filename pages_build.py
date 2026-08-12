@@ -8,6 +8,7 @@ import asyncio
 import datetime as dt
 import json
 import pathlib
+import time
 
 from playwright.async_api import async_playwright
 
@@ -24,6 +25,7 @@ KEEP_DAYS = 60
 
 
 async def main():
+    t0 = time.monotonic()
     rates = get_fx_rates()
     fx = rates.get("INR") if rates else None
     bookings = CONFIG["bookings"]
@@ -97,6 +99,7 @@ async def main():
     now = dt.datetime.now(dt.timezone(dt.timedelta(hours=5, minutes=30)))
     history.append({"date": now.date().isoformat(),
                     "checked_at": now.isoformat(timespec="seconds"),
+                    "duration_seconds": round(time.monotonic() - t0),
                     "fx_inr_per_eur": fx, "hotels": results})
     history = history[-KEEP_DAYS:]
     HIST.write_text(json.dumps(history, indent=1, ensure_ascii=False))

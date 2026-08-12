@@ -141,7 +141,9 @@ def render_page(config, history, fx, interactive=False, public=False,
               if FLOORS_FILE.exists() else {})
     rooms_cache = (json.loads(ROOMS_FILE.read_text())
                    if ROOMS_FILE.exists() else {})
-    runs = {r["date"]: r for r in history}
+    # key by the run timestamp, not the date — several checks can happen in
+    # one day and each is its own point on the trend line
+    runs = {r.get("checked_at", r["date"]): r for r in history}
     dates = sorted(runs)
     latest = runs[dates[-1]] if dates else None
     threshold = config.get("drop_threshold_inr", 500)
@@ -387,7 +389,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                 low_d, low_v = min(vals, key=lambda x: x[1])
                 insights.append(
                     f'📉 lowest tracked: {fmt_inr(low_v)} '
-                    f'({dt.date.fromisoformat(low_d).strftime("%d %b")})')
+                    f'({dt.datetime.fromisoformat(low_d).strftime("%d %b")})')
             floor = floors.get(f'{b["code"]}:{b["dateIn"]}')
             over_floor = None
             if floor:
