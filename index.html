@@ -24,7 +24,9 @@ a:hover { text-decoration:underline; }
   var(--line)); box-shadow:0 1px 3px color-mix(in srgb, var(--accent) 18%,
   transparent); }
 .chead { display:flex; justify-content:space-between; gap:1rem;
-  align-items:flex-start; }
+  align-items:flex-start; flex-wrap:wrap; }
+.cinfo { min-width:0; flex:1 1 260px; }
+.hname { overflow-wrap:anywhere; }
 .hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
 .hmeta { color:var(--muted); font-size:.84rem; margin-top:.1rem; }
 .stag { margin-left:.5rem; padding:.14rem .55rem; border-radius:99px;
@@ -45,7 +47,8 @@ details select { padding:.45rem .55rem; border:1px solid var(--line);
   font-size:.72rem; font-weight:600; vertical-align:2px; white-space:nowrap;
   background:color-mix(in srgb, var(--accent) 12%, transparent);
   color:var(--accent); }
-.cright { text-align:right; flex:none; }
+.cright { text-align:right; flex:0 0 auto; max-width:100%;
+  display:flex; flex-direction:column; align-items:flex-end; gap:.15rem; }
 .trend { margin-top:.4rem; opacity:.9; }
 .prices { display:grid;
   grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
@@ -153,6 +156,31 @@ details label { display:grid; gap:.18rem; font-size:.88em; }
 details input { padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
 .intro { color:var(--muted); font-size:.86rem; max-width:70ch; }
+@media (max-width: 760px) {
+  body { padding:1.2rem .8rem 3rem; }
+  h1 { font-size:1.35rem; }
+  .card { padding:.9rem .85rem; border-radius:14px; }
+  .chead { flex-direction:column; gap:.5rem; }
+  /* in column flow a flex-basis would become a height — reset it */
+  .cinfo { flex:0 0 auto; width:100%; }
+  .cright { flex-direction:row; align-items:center; flex-wrap:wrap;
+    justify-content:flex-start; text-align:left; gap:.4rem; width:100%; }
+  .prevrun, .score { margin:0; }
+  .trend { margin:0; }
+  .prices { grid-template-columns:1fr 1fr; gap:.45rem; }
+  .pbox { padding:.5rem .6rem; }
+  .pval { font-size:1.05rem; }
+  .tiny { font-size:.74rem; }
+  .insights span { font-size:.75rem; }
+  .pointsbar > span, .savingsbar > span { display:block;
+    margin:0 0 .3rem; white-space:normal; }
+  .searchbar { flex-wrap:wrap; }
+  .searchbar input { max-width:none; flex:1 1 100%; }
+  table.ledger { display:block; overflow-x:auto; }
+}
+@media (max-width: 430px) {
+  .prices { grid-template-columns:1fr; }
+}
 </style></head><body>
 <h1>Accor price watch</h1>
 <div class="hmeta">Watching 8 hotel(s) · 2 adults · flexible rates only</div>
