@@ -428,7 +428,8 @@ def publish_public(history, fx):
             runs.append(latest)
             runs = runs[-60:]
             shared.write_text(json.dumps(runs, indent=1, ensure_ascii=False))
-    for name in ("render.py", "check.py", "savings.json", "rooms_cache.json"):
+    for name in ("render.py", "check.py", "savings.json",
+                 "rooms_cache.json", "floors.json"):
         src = BASE / name
         if src.exists():
             (PUBLISH_DIR / name).write_text(src.read_text())
