@@ -1,3 +1,7 @@
 config.json
 history.json
 __pycache__/
+email_subject.txt
+email_body.md
+has_drops.txt
+alert.md

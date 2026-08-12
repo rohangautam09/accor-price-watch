@@ -44,7 +44,9 @@ jobs:
       - name: write a sample alert (test mode)
         if: inputs.test_alert == 'yes'
         run: |
-          cat > alert.md <<'MD'
+          printf 'no' > has_drops.txt
+          printf '%s' "TEST — sample alert" > email_subject.txt
+          cat > email_body.md <<'MD'
           A watched hotel is now cheaper than what you booked.
 
           ### Swissôtel Amsterdam
@@ -78,12 +80,18 @@ jobs:
           git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
           git pull --rebase -q || true
           git push || true
-      - name: email a price-drop alert (via a GitHub issue)
-        if: hashFiles('alert.md') != ''
+      - name: email this check (drops, movement, or "no change")
+        if: hashFiles('email_body.md') != ''
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create --repo "$GITHUB_REPOSITORY" \
-            --title "👀 Bhai Accor check kar — price drop!" \
-            --body-file alert.md
+          URL=$(gh issue create --repo "$GITHUB_REPOSITORY" \
+                  --title "$(cat email_subject.txt)" \
+                  --body-file email_body.md)
+          echo "sent: $URL"
+          # keep the issue list tidy: only real drops stay open
+          if [ "$(cat has_drops.txt)" != "yes" ]; then
+            gh issue close "$URL" --repo "$GITHUB_REPOSITORY" \
+              --comment "auto-closed: routine check" || true
+          fi
