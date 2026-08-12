@@ -132,7 +132,7 @@ def mask_ref(ref):
 
 
 def render_page(config, history, fx, interactive=False, public=False,
-                cloud=False, repo=None, workflow=None):
+                cloud=False, repo=None, workflow=None, failure=None):
     """public=True renders a shareable copy: no booking numbers,
     no points ledger, no cash-at-hotel figures.
     cloud=True renders the full dashboard for GitHub Pages: booking refs
@@ -587,6 +587,9 @@ def render_page(config, history, fx, interactive=False, public=False,
     subtitle = (f"Watching {len(config['bookings'])} hotel(s) · "
                 f"{config['adults']} adults · flexible rates only")
 
+    failbar = (f'<div class="failbar">⚠️ The last automatic check could '
+               f'not fetch prices ({failure}). The figures below are from '
+               f'the previous successful check.</div>' if failure else "")
     if summary_drops or summary_moves:
         changebar = ('<div class="changebar">'
                      + "".join(summary_drops + summary_moves) + "</div>")
@@ -908,6 +911,10 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   white-space:nowrap; font-weight:600; }}
 .prevrun {{ display:inline-block; margin-top:.35rem; padding:.15rem .55rem;
   border-radius:8px; font-size:.76rem; white-space:nowrap; }}
+.failbar {{ margin:.5rem 0 .8rem; padding:.6rem .9rem;
+  border-radius:10px; font-size:.9rem;
+  background:color-mix(in srgb, var(--up) 12%, transparent);
+  color:color-mix(in srgb, var(--up) 85%, var(--fg)); }}
 .changebar {{ display:flex; flex-direction:column; gap:.35rem;
   margin:.4rem 0 .8rem; }}
 .changebar.quiet {{ color:var(--muted); font-size:.86rem; }}
@@ -1028,6 +1035,7 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 <h1>Accor price watch</h1>
 <div class="hmeta">{subtitle}</div>
 <div class="lastcheck">🕑 Last checked: <span id="stamp">{checked}</span></div>
+{failbar}
 {changebar}
 <p class="intro">{fx_note}<br>
 On a drop: <b>book the new rate first, then cancel the old booking</b>.

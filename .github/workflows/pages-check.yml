@@ -1,10 +1,14 @@
 name: pages-check
 
 on:
+  schedule:
+    # ~hourly, 07:07–23:07 IST, off-the-hour (01:37–17:37 UTC)
+    - cron: "37 1-17 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: pages-check
@@ -13,7 +17,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,9 +43,18 @@ jobs:
         run: python pages_build.py
       - name: publish
         run: |
-          rm -f config.json history.json
+          rm -f config.json
           git config user.name "accor-bot"
           git config user.email "actions@github.com"
-          git add index.html history_public.json
+          git add index.html history_public.json alert_state.json status.json
           git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
+          git pull --rebase -q || true
           git push
+      - name: email a price-drop alert (via a GitHub issue)
+        if: hashFiles('alert.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "👀 Bhai Accor check kar — price drop!" \
+            --body-file alert.md
