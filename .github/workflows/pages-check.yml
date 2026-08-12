@@ -38,10 +38,12 @@ jobs:
           ACCOR_CONFIG: ${{ secrets.ACCOR_CONFIG }}
         run: printf '%s' "$ACCOR_CONFIG" > config.json
       - name: fetch prices and build the dashboard
+        continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
         run: python pages_build.py
       - name: publish
+        continue-on-error: true
         run: |
           rm -f config.json
           git config user.name "accor-bot"
@@ -49,9 +51,10 @@ jobs:
           git add -A
           git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
           git pull --rebase -q || true
-          git push
+          git push || true
       - name: email a price-drop alert (via a GitHub issue)
         if: hashFiles('alert.md') != ''
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
