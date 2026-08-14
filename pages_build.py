@@ -178,15 +178,24 @@ async def main():
                     repo=REPO, workflow=WORKFLOW))
 
     drops, fp = find_drops(results, fx)
-    write_email(results, fx, drops, now)
-    STATE.write_text(json.dumps({"fingerprint": fp,
-                                 "at": now.isoformat(timespec="seconds")}))
-    print(f"{len(drops)} drop(s)")
+    old = json.loads(STATE.read_text()) if STATE.exists() else {}
+    if drops and fp != old.get("fingerprint"):
+        write_email(results, fx, drops, now)      # email only for new drops
+        STATE.write_text(json.dumps(
+            {"fingerprint": fp, "at": now.isoformat(timespec="seconds")}))
+        print(f"EMAIL: {len(drops)} drop(s)")
+    elif drops:
+        print(f"{len(drops)} drop(s) — same as last alert, no email")
+    else:
+        if old.get("fingerprint"):
+            STATE.write_text(json.dumps({}))      # reset when prices recover
+        print("no drops — no email, dashboard updated")
     return 0
 
 
 def write_email(results, fx, drops, now):
-    """One email per run: drops first if any, then every hotel's status."""
+    """Only called when a new price drop is found: the drop details first,
+    then the full table for context."""
     by_uid = {r.get("uid", r["code"]): r for r in results}
     rows, moved = [], 0
     for b in CONFIG["bookings"]:
@@ -218,21 +227,11 @@ def write_email(results, fx, drops, now):
                     f'{fmt_inr(booked) if booked else "–"} | '
                     f'{fmt_inr(nowp)} | {since} | {vs} |')
 
-    if drops:
-        subject = (f"👀 Bhai Accor check kar — {len(drops)} hotel(s) cheaper!")
-        head = ("**A watched hotel is now cheaper than what you booked.**\n\n"
-                + "\n\n".join(drops)
-                + "\n\n**Book the new flexible rate first, confirm it, then "
-                  "cancel the old booking.**\n\n---\n\n")
-    else:
-        subject = (f"✅ No change — Accor checked {now:%H:%M} IST"
-                   if not moved else
-                   f"↕️ Prices moved (still above your bookings) "
-                   f"— {now:%H:%M} IST")
-        head = ("No hotel is cheaper than what you booked right now.\n\n"
-                if not moved else
-                f"{moved} hotel(s) moved since the last check, but nothing "
-                f"is below your booked prices yet.\n\n")
+    subject = f"👀 Bhai Accor check kar — {len(drops)} hotel(s) cheaper!"
+    head = ("**A watched hotel is now cheaper than what you booked.**\n\n"
+            + "\n\n".join(drops)
+            + "\n\n**Book the new flexible rate first, confirm it, then "
+              "cancel the old booking.**\n\n---\n\n")
     body = (head
             + "| Hotel | Dates | Booked | Now | Since last | vs booked |\n"
             + "|---|---|---|---|---|---|\n" + "\n".join(rows)
@@ -240,7 +239,7 @@ def write_email(results, fx, drops, now):
               f"accor-price-watch/) · checked {now:%d %b %H:%M} IST\n")
     (BASE / "email_subject.txt").write_text(subject)
     (BASE / "email_body.md").write_text(body)
-    (BASE / "has_drops.txt").write_text("yes" if drops else "no")
+    (BASE / "has_drops.txt").write_text("yes")
 
 
 if __name__ == "__main__":

@@ -80,7 +80,7 @@ jobs:
           git commit -m "prices $(date -u +'%Y-%m-%d %H:%M') UTC" || exit 0
           git pull --rebase -q || true
           git push || true
-      - name: email this check (drops, movement, or "no change")
+      - name: email me only when a price drops
         if: hashFiles('email_body.md') != ''
         continue-on-error: true
         env:
@@ -89,7 +89,7 @@ jobs:
           # exactly one notification per run: create the issue and leave
           # it alone (closing or commenting would each send another email)
           URL=$(gh issue create --repo "$GITHUB_REPOSITORY" \
-                  --label "$([ "$(cat has_drops.txt)" = yes ] && echo drop || echo routine)" \
+                  --label drop \
                   --title "$(cat email_subject.txt)" \
                   --body-file email_body.md)
           echo "sent: $URL"
