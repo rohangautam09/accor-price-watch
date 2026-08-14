@@ -459,7 +459,8 @@ def render_page(config, history, fx, interactive=False, public=False,
             eur_line = (f'<div class="tiny">€{b["booked_eur"]:,.2f} fixed · '
                         f'₹ at today\'s rate</div>'
                         if b.get("booked_eur") else "")
-            if is_booked and b.get("booked_eur") and not public:
+            # points maths applies to anything with a price, booked or not
+            if b.get("booked_eur") and not public:
                 cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
                 short = max(cap - b_pts, 0)
                 cash_after = b["booked_eur"] - cap * 0.02
@@ -467,7 +468,12 @@ def render_page(config, history, fx, interactive=False, public=False,
                         * config["adults"] * int(b["nights"]))
                 flat_txt = (f' + €{flat:,.2f} city tax at hotel'
                             if flat else "")
-                if short:
+                if not short:
+                    eur_line += (
+                        f'<div class="tiny pts">💠 {b_pts:,} pts applied — '
+                        f'max reached · €{cash_after:,.2f} cash{flat_txt}'
+                        f'</div>')
+                elif is_booked:
                     eur_line += (
                         f'<div class="tiny pts">if paid with points: '
                         f'<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
@@ -477,9 +483,9 @@ def render_page(config, history, fx, interactive=False, public=False,
                         + '</div>')
                 else:
                     eur_line += (
-                        f'<div class="tiny pts">💠 {b_pts:,} pts applied — '
-                        f'max reached · €{cash_after:,.2f} cash{flat_txt}'
-                        f'</div>')
+                        f'<div class="tiny pts">if you book it with points: '
+                        f'<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
+                        f'{flat_txt}</div>')
             booked_box = (f'<div class="pbox"><div class="plabel">Booked'
                           f'</div><div class="pval">'
                           f'{fmt_inr(eff_booked)}</div>'
