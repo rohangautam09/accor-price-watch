@@ -849,10 +849,16 @@ async function removeHotel(code,dateIn,nights,name){
   :root {{ --bg:#0e0f12; --card:#17181c; --box:#1d1f24; --fg:#e8e9eb;
     --muted:#9aa0a8; --line:#2a2c32; --accent:#4f9cf0; }} }}
 * {{ box-sizing:border-box; }}
-body {{ font:15px/1.55 -apple-system, "Segoe UI", sans-serif;
+body {{ font:15px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
   background:var(--bg); color:var(--fg); max-width:1360px;
-  margin:0 auto; padding:2rem 1.4rem 4rem; }}
-h1 {{ font-size:1.55rem; margin:0 0 .1rem; letter-spacing:-.02em; }}
+  margin:0 auto; padding:2rem 1.4rem 4rem; letter-spacing:0;
+  font-optical-sizing:auto; -webkit-font-smoothing:antialiased; }}
+/* larger type reads too loose: tighten tracking and leading as size grows */
+h1 {{ font-size:1.6rem; margin:0 0 .15rem; letter-spacing:-.021em;
+  line-height:1.1; font-weight:680; }}
+.hname {{ letter-spacing:-.012em; line-height:1.25; }}
+.pval {{ letter-spacing:-.015em; font-variant-numeric:tabular-nums; }}
+.tiny, .hmeta {{ letter-spacing:.004em; }}   /* small text wants air */
 small {{ color:var(--muted); }}
 a {{ color:var(--accent); text-decoration:none; }}
 a:hover {{ text-decoration:underline; }}
@@ -965,7 +971,16 @@ td.savepos {{ color:var(--drop); font-weight:650; }}
   background:color-mix(in srgb, var(--accent) 11%, transparent);
   color:var(--accent); }}
 .searchbar {{ margin:.9rem 0 1.1rem; display:flex; align-items:center;
-  gap:.8rem; }}
+  gap:.8rem; position:sticky; top:0; z-index:5;
+  padding:.6rem .7rem; border-radius:14px;
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%); }}
+/* scroll edge effect instead of a hard divider under floating chrome */
+.searchbar::after {{ content:""; position:absolute; left:0; right:0;
+  bottom:-14px; height:14px; pointer-events:none;
+  background:linear-gradient(color-mix(in srgb, var(--bg) 70%, transparent),
+    transparent); }}
 .searchbar input {{ flex:1; max-width:430px; padding:.55rem .85rem;
   border:1px solid var(--line); border-radius:10px; background:var(--card);
   color:var(--fg); font-size:1em; }}
@@ -985,6 +1000,11 @@ button.primary {{ background:var(--accent); color:#fff; border:none;
   padding:.55rem 1.1rem; border-radius:9px; font-size:.95em; font-weight:600;
   cursor:pointer; }}
 button.primary:hover {{ filter:brightness(1.08); }}
+button.primary:active {{ transform:scale(.97); }}
+button.link:active {{ opacity:.55; }}
+.ci:active {{ transform:scale(.995); }}
+button, .ci, summary {{ -webkit-tap-highlight-color:transparent;
+  transition:transform 100ms ease-out, opacity 100ms ease-out; }}
 button.primary:disabled {{ opacity:.5; cursor:wait; }}
 button.link {{ background:none; border:none; padding:0; cursor:pointer;
   font-size:.86rem; color:var(--accent); }}
@@ -995,7 +1015,12 @@ button.link.danger {{ color:var(--up); }}
 details summary {{ cursor:pointer; color:var(--accent); }}
 details form {{ display:grid; gap:.6rem; max-width:460px; margin-top:.8rem;
   padding:1rem 1.1rem; border:1px solid var(--line); border-radius:12px;
-  background:var(--card); }}
+  background:var(--card); transform-origin:top left; }}
+details[open] > form, details[open] > .setupbox, details[open] > table {{
+  animation:materialize .28s cubic-bezier(.32,.72,0,1); }}
+@keyframes materialize {{
+  from {{ opacity:0; transform:scale(.97) translateY(-4px); filter:blur(3px); }}
+  to {{ opacity:1; transform:none; filter:none; }} }}
 details label {{ display:grid; gap:.18rem; font-size:.88em; }}
 details input {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
@@ -1006,6 +1031,21 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 .setupbox input {{ padding:.5rem .6rem; border:1px solid var(--line);
   border-radius:8px; background:var(--bg); color:var(--fg); min-width:220px;
   margin-right:.4rem; }}
+@media (prefers-reduced-motion: reduce) {{
+  * {{ animation-duration:.01ms !important; animation-iteration-count:1 !important;
+       transition-duration:120ms !important; }}
+  details[open] > form, details[open] > .setupbox {{ animation:none; }}
+}}
+@media (prefers-reduced-transparency: reduce) {{
+  .searchbar {{ background:var(--bg); backdrop-filter:none;
+    -webkit-backdrop-filter:none; }}
+  .searchbar::after {{ display:none; }}
+}}
+@media (prefers-contrast: more) {{
+  .card {{ border-color:var(--fg); }}
+  .pbox {{ border-color:color-mix(in srgb, var(--fg) 45%, transparent); }}
+  .searchbar {{ background:var(--bg); backdrop-filter:none; }}
+}}
 @media (max-width: 760px) {{
   body {{ padding:1.2rem .8rem 3rem; }}
   h1 {{ font-size:1.35rem; }}
@@ -1062,6 +1102,41 @@ document.querySelectorAll('.card').forEach(function(c){{
   var show=!q||c.textContent.toLowerCase().indexOf(q)>=0;
   c.style.display=show?'':'none'; if(show)n++;}});
 document.getElementById('rowcount').textContent=n;}}
+/* critically damped spring (damping 1.0, response .4) sampled into a
+   linear() easing — springs settle from the current value, so a re-sort
+   mid-flight is picked up rather than jumping */
+function springEasing(response, damping, steps){{
+  response=response||0.4; damping=damping===undefined?1:damping; steps=steps||60;
+  var w=2*Math.PI/response, out=[], T=response*2.2;
+  for(var i=0;i<=steps;i++){{
+    var t=T*i/steps, v;
+    if(damping>=1){{ v=1-(1+w*t)*Math.exp(-w*t); }}
+    else {{ var wd=w*Math.sqrt(1-damping*damping);
+      v=1-Math.exp(-damping*w*t)*(Math.cos(wd*t)+damping*w/wd*Math.sin(wd*t)); }}
+    out.push(v.toFixed(4));
+  }}
+  return 'linear('+out.join(',')+')';
+}}
+var SPRING=null, SPRING_MS=880;
+function flipReorder(box, reorder){{
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var kids=Array.prototype.slice.call(box.children);
+  var first={{}};
+  kids.forEach(function(c,i){{ first[i]=c.getBoundingClientRect().top; c.dataset.flip=i; }});
+  reorder();
+  if(reduce) return;
+  if(!SPRING) SPRING=springEasing(0.4,1,60);
+  Array.prototype.slice.call(box.children).forEach(function(c){{
+    var from=first[c.dataset.flip], to=c.getBoundingClientRect().top, dy=from-to;
+    if(Math.abs(dy)<1) return;
+    /* start from the live on-screen position, cancelling any in-flight move */
+    var running=c.getAnimations().filter(function(a){{return a.id==='flip';}});
+    running.forEach(function(a){{ a.cancel(); }});
+    var a=c.animate([{{transform:'translateY('+dy+'px)'}},{{transform:'none'}}],
+      {{duration:SPRING_MS, easing:SPRING, composite:'replace'}});
+    a.id='flip';
+  }});
+}}
 function sortCards(m){{
   var box=document.getElementById('cards');
   var cards=Array.prototype.slice.call(box.children);
@@ -1072,14 +1147,16 @@ function sortCards(m){{
     drop:function(c){{return parseFloat(c.dataset.diff||9e12);}},
     orig:function(c){{return parseInt(c.dataset.idx||0,10);}}
   }}[m];
-  cards.sort(function(a,b){{
-    var pa=parseInt(b.dataset.pin||0,10)-parseInt(a.dataset.pin||0,10);
-    if(pa) return pa;
-    if(a.dataset.pin==='1'){{
-      return parseInt(a.dataset.pinrank||0,10)-parseInt(b.dataset.pinrank||0,10);
-    }}
-    return key(a)-key(b);}});
-  cards.forEach(function(c){{box.appendChild(c);}});
+  flipReorder(box, function(){{
+    cards.sort(function(a,b){{
+      var pa=parseInt(b.dataset.pin||0,10)-parseInt(a.dataset.pin||0,10);
+      if(pa) return pa;
+      if(a.dataset.pin==='1'){{
+        return parseInt(a.dataset.pinrank||0,10)-parseInt(b.dataset.pinrank||0,10);
+      }}
+      return key(a)-key(b);}});
+    cards.forEach(function(c){{box.appendChild(c);}});
+  }});
 }}
 document.addEventListener('DOMContentLoaded',function(){{
   var i=0;
