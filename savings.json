@@ -78,5 +78,25 @@
   "old_eur": 784.34,
   "new_eur": 854.65,
   "saved_eur": -70.31
+ },
+ {
+  "date": "2026-08-15",
+  "name": "Aparthotel Adagio Amsterdam City South",
+  "uid": "B355:2026-09-16:5",
+  "from": "QNVLGJXS",
+  "to": "QPJLFFVN",
+  "old_eur": 852.57,
+  "new_eur": 763.69,
+  "saved_eur": 88.88
+ },
+ {
+  "date": "2026-08-15",
+  "name": "ibis budget Brugge Centrum Station",
+  "uid": "5046:2026-09-21:2",
+  "from": "QNTPBWSZ",
+  "to": "QPJPFRRH",
+  "old_eur": 188.26,
+  "new_eur": 176.05,
+  "saved_eur": 12.21
  }
 ]
