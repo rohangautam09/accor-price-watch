@@ -168,18 +168,23 @@ def render_page(config, history, fx, interactive=False, public=False,
                         f'</button>')
     else:
         total_widget = f"<strong>{total_pts:,}</strong>"
-    # can the points balance cover the stays actually booked?
+    # what you will actually pay, and whether points could cover more
     need_pts = cash_left_eur = flat_tax_eur = 0
+    due_eur = pts_on_bookings = 0        # actual, given points already applied
     booked_n = 0
     for b in config["bookings"]:
         if b.get("status", "booked") != "booked" or not b.get("booked_eur"):
             continue
         booked_n += 1
+        used = int(b.get("points_used", 0))
         cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
-        need_pts += max(cap - int(b.get("points_used", 0)), 0)
+        need_pts += max(cap - used, 0)
         cash_left_eur += b["booked_eur"] - cap * 0.02
-        flat_tax_eur += (float(b.get("city_tax_flat_eur") or 0)
-                         * config["adults"] * int(b["nights"]))
+        flat = (float(b.get("city_tax_flat_eur") or 0)
+                * config["adults"] * int(b["nights"]))
+        flat_tax_eur += flat
+        pts_on_bookings += used
+        due_eur += max(b["booked_eur"] - used * 0.02, 0) + flat
     flat_note = (f'<br><small>Plus <strong>€{flat_tax_eur:,.2f}'
                  f'{f" ≈ {fmt_inr(flat_tax_eur * fx)}" if fx else ""}</strong>'
                  f' of flat city tax (Belgium) collected at the hotel — not '
@@ -205,6 +210,16 @@ def render_page(config, history, fx, interactive=False, public=False,
                     f'<strong>€{cash_left_eur:,.2f}'
                     f'{f" ≈ {fmt_inr(cash_left_eur * fx)}" if fx else ""}'
                     f'</strong>{flat_note}</div>')
+
+    due_bar = "" if (public or not booked_n) else f"""
+<div class="duebar">
+  <span>💳 Cash to pay at the hotels:
+    <strong>{fmt_inr(due_eur * fx) if fx else f"€{due_eur:,.2f}"}</strong>
+    <small>(€{due_eur:,.2f} across {booked_n} booked stay(s), city taxes
+    included)</small></span>
+  <br><small>{pts_on_bookings:,} points already applied to these bookings
+  {f"— worth {fmt_inr(pts_inr(pts_on_bookings, fx))}" if fx else ""}</small>
+</div>"""
 
     points_bar = "" if public else f"""
 <div class="pointsbar">
@@ -968,6 +983,10 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .same, .err {{ background:color-mix(in srgb, var(--muted) 14%, transparent);
   color:var(--muted); font-weight:500; }}
 .controls {{ margin:1rem 0 .4rem; }}
+.duebar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
+  background:color-mix(in srgb, var(--accent) 8%, var(--card));
+  border:1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  font-size:1.02rem; }}
 .savingsbar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
   background:color-mix(in srgb, var(--drop) 9%, var(--card));
   border:1px solid color-mix(in srgb, var(--drop) 30%, var(--line)); }}
@@ -1103,6 +1122,7 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 On a drop: <b>book the new rate first, then cancel the old booking</b>.
 Dashed line in the trend = your booked price. 💠 lines show the max points
 usable (2,000-pt steps) + the cash left to pay.</p>
+{due_bar}
 {savings_bar}
 {points_bar}
 {controls}
