@@ -714,7 +714,6 @@ async function cloudRefresh(){{
       <button type="submit" class="primary">Add to watch list</button>
     </form>
   </details>
-  <span id="status"></span>
   <details><summary>settings</summary>
     <form onsubmit="return saveSettings(event)">
       <label>Scan ± days around each check-in for cheaper start dates
@@ -724,6 +723,7 @@ async function cloudRefresh(){{
       <button type="submit" class="primary">Save</button>
     </form>
   </details>
+  <span id="status"></span>
 </div>"""
         script = """
 <script>
@@ -978,7 +978,7 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   var(--fg) 25%, var(--line)); }}
 .controls > details[open] > summary {{ border-color:color-mix(in srgb,
   var(--accent) 45%, var(--line)); color:var(--accent); }}
-.controls #status {{ align-self:center; }}
+.controls #status {{ flex-basis:100%; margin:.15rem 0 0; }}
 .duehead {{ display:flex; justify-content:space-between; gap:1rem;
   align-items:baseline; font-weight:600; margin-bottom:.5rem; }}
 .duehead strong {{ font-size:1.15rem; }}
@@ -1047,7 +1047,8 @@ button.link {{ background:none; border:none; padding:0; cursor:pointer;
   font-size:.86rem; color:var(--accent); }}
 button.link:hover {{ text-decoration:underline; }}
 button.link.danger {{ color:var(--up); }}
-#status {{ margin-left:.8rem; color:var(--muted); font-size:.9rem; }}
+#status {{ color:var(--muted); font-size:.88rem; min-height:1.2em;
+  display:block; }}
 details summary {{ cursor:pointer; color:var(--accent); }}
 details form {{ display:grid; gap:.6rem; max-width:460px; margin-top:.8rem;
   padding:1rem 1.1rem; border:1px solid var(--line); border-radius:12px;
