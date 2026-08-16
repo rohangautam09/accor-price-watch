@@ -259,6 +259,12 @@ def render_page(config, history, fx, interactive=False, public=False,
         status_tag = (f'<span class="stag booked">✅ booked</span>'
                       if is_booked else
                       f'<span class="stag track">👀 tracking</span>')
+        pts_on_booking = int(b.get("points_used", 0))
+        if b.get("booked_inr") and not public:
+            status_tag += (
+                f'<span class="stag ptag">💠 {pts_on_booking:,} pts used</span>'
+                if pts_on_booking else
+                '<span class="stag cash">💳 pay at hotel</span>')
         cur = None
         if latest:
             cur = next((h for h in latest["hotels"]
@@ -459,29 +465,25 @@ def render_page(config, history, fx, interactive=False, public=False,
             eur_line = (f'<div class="tiny">€{b["booked_eur"]:,.2f} fixed · '
                         f'₹ at today\'s rate</div>'
                         if b.get("booked_eur") else "")
-            # points maths applies to anything with a price, booked or not
+            # plain language: what you actually paid with, not theory
             if b.get("booked_eur") and not public:
                 cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
-                short = max(cap - b_pts, 0)
-                cash_after = b["booked_eur"] - cap * 0.02
                 flat = (float(b.get("city_tax_flat_eur") or 0)
                         * config["adults"] * int(b["nights"]))
                 flat_txt = (f' + €{flat:,.2f} city tax at hotel'
                             if flat else "")
-                if not short:
+                if b_pts:                       # points were used
+                    cash_due = max(b["booked_eur"] - b_pts * 0.02, 0)
                     eur_line += (
-                        f'<div class="tiny pts">💠 {b_pts:,} pts applied — '
-                        f'max reached · €{cash_after:,.2f} cash{flat_txt}'
-                        f'</div>')
-                elif is_booked:
+                        f'<div class="tiny pts">💠 {b_pts:,} pts used · '
+                        f'€{cash_due:,.2f} cash{flat_txt}</div>')
+                elif is_booked:                 # booked, paid in cash
                     eur_line += (
-                        f'<div class="tiny pts">if paid with points: '
-                        f'<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
-                        f'{flat_txt}'
-                        + (f' · {b_pts:,} applied so far' if b_pts else
-                           ' · booked with cash — would need rebooking')
-                        + '</div>')
-                else:
+                        f'<div class="tiny">💳 no points used · '
+                        f'€{b["booked_eur"]:,.2f} cash{flat_txt}'
+                        f'<br>could have used up to {cap:,} pts</div>')
+                else:                           # only tracking it
+                    cash_after = b["booked_eur"] - cap * 0.02
                     eur_line += (
                         f'<div class="tiny pts">if you book it with points: '
                         f'<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
@@ -887,6 +889,10 @@ a:hover {{ text-decoration:underline; }}
   color:var(--drop); }}
 .stag.track {{ background:color-mix(in srgb, var(--muted) 16%, transparent);
   color:var(--muted); }}
+.stag.ptag {{ background:color-mix(in srgb, var(--accent) 13%, transparent);
+  color:var(--accent); }}
+.stag.cash {{ background:color-mix(in srgb, var(--amber, #b8860b) 16%,
+  transparent); color:color-mix(in srgb, var(--fg) 70%, var(--up)); }}
 .cov {{ margin-top:.6rem; padding:.5rem .8rem; border-radius:10px;
   font-size:.9rem; }}
 .cov.ok {{ background:color-mix(in srgb, var(--drop) 12%, transparent);
