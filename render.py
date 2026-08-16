@@ -171,6 +171,8 @@ def render_page(config, history, fx, interactive=False, public=False,
     # what you will actually pay, and whether points could cover more
     need_pts = cash_left_eur = flat_tax_eur = 0
     due_eur = pts_on_bookings = 0        # actual, given points already applied
+    cash_group = {"eur": 0.0, "n": 0}    # paid entirely at the hotel
+    pts_group = {"eur": 0.0, "n": 0}     # part points, rest at the hotel
     booked_n = 0
     for b in config["bookings"]:
         if b.get("status", "booked") != "booked" or not b.get("booked_eur"):
@@ -184,7 +186,14 @@ def render_page(config, history, fx, interactive=False, public=False,
                 * config["adults"] * int(b["nights"]))
         flat_tax_eur += flat
         pts_on_bookings += used
-        due_eur += max(b["booked_eur"] - used * 0.02, 0) + flat
+        stay_due = max(b["booked_eur"] - used * 0.02, 0) + flat
+        due_eur += stay_due
+        if used:
+            pts_group["eur"] += stay_due
+            pts_group["n"] += 1
+        else:
+            cash_group["eur"] += stay_due
+            cash_group["n"] += 1
     flat_note = (f'<br><small>Plus <strong>€{flat_tax_eur:,.2f}'
                  f'{f" ≈ {fmt_inr(flat_tax_eur * fx)}" if fx else ""}</strong>'
                  f' of flat city tax (Belgium) collected at the hotel — not '
@@ -211,14 +220,27 @@ def render_page(config, history, fx, interactive=False, public=False,
                     f'{f" ≈ {fmt_inr(cash_left_eur * fx)}" if fx else ""}'
                     f'</strong>{flat_note}</div>')
 
+    def money(e):
+        return fmt_inr(e * fx) if fx else f"€{e:,.2f}"
+
+    due_rows = ""
+    if cash_group["n"]:
+        due_rows += (f'<div class="bline duerow"><span>💳 pay in full at the '
+                     f'hotel · {cash_group["n"]} stay(s)</span>'
+                     f'<span><b>{money(cash_group["eur"])}</b></span></div>')
+    if pts_group["n"]:
+        due_rows += (f'<div class="bline duerow"><span>💠 points + cash · '
+                     f'{pts_group["n"]} stay(s)'
+                     f'<br><small>{pts_on_bookings:,} pts applied'
+                     f'{f" — worth {fmt_inr(pts_inr(pts_on_bookings, fx))}" if fx else ""}'
+                     f'</small></span>'
+                     f'<span><b>{money(pts_group["eur"])}</b></span></div>')
     due_bar = "" if (public or not booked_n) else f"""
 <div class="duebar">
-  <span>💳 Cash to pay at the hotels:
-    <strong>{fmt_inr(due_eur * fx) if fx else f"€{due_eur:,.2f}"}</strong>
-    <small>(€{due_eur:,.2f} across {booked_n} booked stay(s), city taxes
-    included)</small></span>
-  <br><small>{pts_on_bookings:,} points already applied to these bookings
-  {f"— worth {fmt_inr(pts_inr(pts_on_bookings, fx))}" if fx else ""}</small>
+  <div class="duehead">💳 Cash still to pay at the hotels
+    <strong>{money(due_eur)}</strong></div>
+  {due_rows}
+  <small>across {booked_n} booked stay(s) · city taxes included</small>
 </div>"""
 
     points_bar = "" if public else f"""
@@ -971,6 +993,11 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .same, .err {{ background:color-mix(in srgb, var(--muted) 14%, transparent);
   color:var(--muted); font-weight:500; }}
 .controls {{ margin:1rem 0 .4rem; }}
+.duehead {{ display:flex; justify-content:space-between; gap:1rem;
+  align-items:baseline; font-weight:600; margin-bottom:.5rem; }}
+.duehead strong {{ font-size:1.15rem; }}
+.duerow {{ font-size:.9rem; padding:.35rem 0;
+  border-top:1px solid color-mix(in srgb, var(--accent) 18%, transparent); }}
 .duebar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
   background:color-mix(in srgb, var(--accent) 8%, var(--card));
   border:1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
