@@ -151,6 +151,14 @@ table.ledger th, table.ledger td { text-align:left; padding:.35rem .6rem;
 table.ledger th { color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }
 td.savepos { color:var(--drop); font-weight:650; }
+.ratebar { margin:.9rem 0; padding:.85rem 1.1rem; background:var(--card);
+  border:1px solid var(--line); border-radius:12px; display:flex;
+  flex-wrap:wrap; align-items:baseline; gap:.3rem 2.4rem; }
+.rate { display:flex; align-items:baseline; gap:.55rem; }
+.rate b { font-size:1.3rem; font-weight:600; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums; }
+.rate span { color:var(--muted); font-size:.87rem; }
+.rcap { flex-basis:100%; color:var(--muted); font-size:.8rem; }
 .pointsbar { margin:.5rem 0; padding:.9rem 1.1rem;
   border:1px solid var(--line); border-radius:12px; background:var(--card); }
 .pointsbar > span { margin-right:1.5rem; white-space:nowrap; }
@@ -268,14 +276,15 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 <div class="lastcheck">Last checked: <span id="stamp">2026-08-17 00:30:01+05:30 (fetched in 14s)</span></div>
 
 <div class="changebar quiet">nothing moved more than ₹500 since the last run</div>
-<p class="intro">1 EUR ≈ ₹110.36 (market rate; Accor converts at its own slightly different rate) · on a drop, book the new rate before
-cancelling the old one.</p>
+<div class="ratebar"><div class="rate"><b>₹110.3598</b><span>per €1</span></div><div class="rate"><b>₹2.21</b><span>per ALL point</span></div><div class="rcap">2,000 pts = €40 ≈ ₹4,414 · market rate — Accor converts at its own, slightly different rate · refreshed on every price check</div></div>
+<p class="intro">on a drop, book the new rate before cancelling the old
+one.</p>
 
 <div class="duebar">
   <div class="duehead">Cash still to pay at the hotels
     <strong>₹130,474</strong></div>
   <div class="bline duerow"><span>pay in full at the hotel · 1 stay(s)</span><span><b>₹114,774</b></span></div><div class="bline duerow"><span>points + cash · 4 stay(s)<br><small>26,000 pts applied — worth ₹57,387</small></span><span><b>₹15,700</b></span></div>
-  <small>across 5 booked stay(s) · city taxes included</small>
+  <small>across 5 booked stay(s)</small>
 </div>
 
 <div class="savingsbar">
@@ -294,9 +303,6 @@ cancelling the old one.</p>
   <span>ALL points — total: <strong>77,804</strong> <small class="pts">≈ ₹171,729</small></span>
   <span>used in bookings: <strong>26,000</strong> <small class="pts">≈ ₹57,387</small></span>
   <span>remaining: <strong>51,804</strong> <small class="pts">≈ ₹114,342</small></span>
-  <br><small>2,000 pts = €40 ≈ ₹4,414
-   · 1 pt ≈ ₹2.21
-  (rate refreshes on every price check)</small>
   <div class="cov ok"><div class="covhead">Your points cover every booked stay<small> — if you put the most points Accor allows on all 5 booked stay(s)</small></div><div class="covrow"><span>points needed, on top of the 26,000 already applied</span><span class="covpts">48,000 pts</span><span>₹105,945</span></div><div class="covrow"><span>points left over afterwards</span><span class="covpts">3,804 pts</span><span><b>₹8,396</b></span></div></div>
 </div>
 

@@ -307,7 +307,7 @@ def render_page(config, history, fx, interactive=False, public=False,
   <div class="duehead">Cash still to pay at the hotels
     <strong>{money(due_eur)}</strong></div>
   {due_rows}
-  <small>across {booked_n} booked stay(s) · city taxes included</small>
+  <small>across {booked_n} booked stay(s)</small>
 </div>"""
 
     points_bar = "" if public else f"""
@@ -315,9 +315,6 @@ def render_page(config, history, fx, interactive=False, public=False,
   <span>ALL points — total: {total_widget}{worth_txt(total_pts)}</span>
   <span>used in bookings: <strong>{used_pts:,}</strong>{worth_txt(used_pts)}</span>
   <span>remaining: <strong>{remaining_pts:,}</strong>{worth_txt(remaining_pts)}</span>
-  <br><small>2,000 pts = €40{f" ≈ {fmt_inr(40 * fx)}" if fx else ""}
-  {f" · 1 pt ≈ ₹{0.02 * fx:.2f}" if fx else ""}
-  (rate refreshes on every price check)</small>
   {coverage}
 </div>"""
 
@@ -727,12 +724,24 @@ def render_page(config, history, fx, interactive=False, public=False,
                      f'than {fmt_inr(threshold)} since the last run</div>')
     else:
         changebar = ""
+    # the two rates every figure on this page is built from — kept big and
+    # near the top, because everything else is meaningless without them
     fx_src = (latest or {}).get("fx_source")
-    fx_note = ((f"1 EUR = ₹{fx:,.4f} — Accor's own conversion rate, so ₹ "
-                f"figures match their pages" if fx_src == "accor" else
-                f"1 EUR ≈ ₹{fx:,.2f} (market rate; Accor converts at its own "
-                f"slightly different rate)") if fx else
-               "FX rate unavailable — INR conversion skipped")
+    if fx:
+        fx_cap = ("Accor's own conversion rate, so every ₹ here matches "
+                  "their pages" if fx_src == "accor" else
+                  "market rate — Accor converts at its own, slightly "
+                  "different rate")
+        rate_bar = (f'<div class="ratebar">'
+                    f'<div class="rate"><b>₹{fx:,.4f}</b>'
+                    f'<span>per €1</span></div>'
+                    f'<div class="rate"><b>₹{0.02 * fx:,.2f}</b>'
+                    f'<span>per ALL point</span></div>'
+                    f'<div class="rcap">2,000 pts = €40 ≈ {fmt_inr(40 * fx)} '
+                    f'· {fx_cap} · refreshed on every price check</div></div>')
+    else:
+        rate_bar = ('<div class="ratebar"><div class="rcap">FX rate '
+                    'unavailable — ₹ conversion skipped</div></div>')
 
     controls = ""
     script = ""
@@ -1123,6 +1132,14 @@ table.ledger th, table.ledger td {{ text-align:left; padding:.35rem .6rem;
 table.ledger th {{ color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }}
 td.savepos {{ color:var(--drop); font-weight:650; }}
+.ratebar {{ margin:.9rem 0; padding:.85rem 1.1rem; background:var(--card);
+  border:1px solid var(--line); border-radius:12px; display:flex;
+  flex-wrap:wrap; align-items:baseline; gap:.3rem 2.4rem; }}
+.rate {{ display:flex; align-items:baseline; gap:.55rem; }}
+.rate b {{ font-size:1.3rem; font-weight:600; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums; }}
+.rate span {{ color:var(--muted); font-size:.87rem; }}
+.rcap {{ flex-basis:100%; color:var(--muted); font-size:.8rem; }}
 .pointsbar {{ margin:.5rem 0; padding:.9rem 1.1rem;
   border:1px solid var(--line); border-radius:12px; background:var(--card); }}
 .pointsbar > span {{ margin-right:1.5rem; white-space:nowrap; }}
@@ -1240,8 +1257,9 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 <div class="lastcheck">Last checked: <span id="stamp">{checked}</span></div>
 {failbar}
 {changebar}
-<p class="intro">{fx_note} · on a drop, book the new rate before
-cancelling the old one.</p>
+{rate_bar}
+<p class="intro">on a drop, book the new rate before cancelling the old
+one.</p>
 {due_bar}
 {savings_bar}
 {points_bar}
