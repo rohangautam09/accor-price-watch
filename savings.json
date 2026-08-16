@@ -98,5 +98,15 @@
   "old_eur": 188.26,
   "new_eur": 176.05,
   "saved_eur": 12.21
+ },
+ {
+  "date": "2026-08-17",
+  "name": "ibis Antwerpen Centrum",
+  "uid": "1453:2026-09-23:1",
+  "from": "QNKPCTLP",
+  "to": "QPLPFXNG",
+  "old_eur": 105.26,
+  "new_eur": 99.81,
+  "saved_eur": 5.45
  }
 ]
