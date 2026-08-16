@@ -464,59 +464,44 @@ def render_page(config, history, fx, interactive=False, public=False,
                                       nights=b["nights"],
                                       adults=config["adults"])
         b_pts = int(b.get("points_used", 0))
-        booked_extra = ""
+        meal_txt = "🍳 incl. breakfast" if wants_bb else "room only"
         if b["booked_inr"]:
-            booked_extra = (f'<div class="tiny">{"🍳 incl. breakfast"
-                            if wants_bb else "room only"}</div>')
-        if b["booked_inr"] and b_pts and not public:
-            pv = pts_inr(b_pts, fx)
-            if pv:
-                cash = max(eff_booked - pv, 0)
-                booked_extra += (f'<div class="tiny pts">− {b_pts:,} pts '
-                                 f'(≈ {fmt_inr(pv)})</div>'
-                                 f'<div class="tiny">cash at hotel ≈ '
-                                 f'<b>{fmt_inr(cash)}</b></div>')
-        if b["booked_inr"]:
-            eur_line = (f'<div class="tiny">€{b["booked_eur"]:,.2f} fixed · '
-                        f'₹ at today\'s rate</div>'
-                        if b.get("booked_eur") else "")
-            # plain language: what you actually paid with, not theory
-            if b.get("booked_eur") and not public:
-                cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
-                flat = (float(b.get("city_tax_flat_eur") or 0)
+            flat_eur = (float(b.get("city_tax_flat_eur") or 0)
                         * config["adults"] * int(b["nights"]))
-                flat_txt = (f' + €{flat:,.2f} city tax at hotel'
-                            if flat else "")
-                if b_pts:                       # points were used
-                    cash_due = max(b["booked_eur"] - b_pts * 0.02, 0)
-                    eur_line += (
-                        f'<div class="tiny pts">💠 {b_pts:,} pts used · '
-                        f'€{cash_due:,.2f} cash{flat_txt}</div>')
-                elif is_booked:                 # booked, paid in cash
-                    cash_after = b["booked_eur"] - cap * 0.02
-                    with_pts = (
-                        f'<div class="tiny pts">with points it would be '
-                        f'≈<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
-                        f'{f" ≈ {fmt_inr(cash_after * fx)}" if fx else ""}'
-                        f'{flat_txt} — needs rebooking</div>'
-                        if cap else "")
-                    eur_line += (
-                        f'<div class="tiny">💳 no points used · '
-                        f'€{b["booked_eur"]:,.2f} cash{flat_txt}</div>'
-                        f'{with_pts}')
-                else:                           # only tracking it
-                    cash_after = b["booked_eur"] - cap * 0.02
-                    eur_line += (
-                        f'<div class="tiny pts">if you book it with points: '
-                        f'<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
-                        f'{flat_txt}</div>')
-            booked_box = (f'<div class="pbox"><div class="plabel">Booked'
-                          f'</div><div class="pval">'
-                          f'{fmt_inr(eff_booked)}</div>'
-                          f'{eur_line}{booked_extra}</div>')
+            cap = max_points_for(b["booked_eur"] or 0, b.get("city_tax_pct"))
+            rows = [f'<div class="tiny">€{b["booked_eur"]:,.2f} · {meal_txt}'
+                    f'</div>' if b.get("booked_eur") else
+                    f'<div class="tiny">{meal_txt}</div>']
+            if not public and b.get("booked_eur"):
+                cash_eur = max(b["booked_eur"] - b_pts * 0.02, 0) + flat_eur
+                tax_note = (f' <span class="tiny">incl. '
+                            f'{fmt_inr(flat_eur * fx) if fx else f"€{flat_eur:,.2f}"}'
+                            f' city tax</span>' if flat_eur else "")
+                if is_booked and b_pts:
+                    rows.append(
+                        f'<div class="bline"><span>💠 {b_pts:,} pts</span>'
+                        f'<span class="pts">−{fmt_inr(pts_inr(b_pts, fx))}'
+                        f'</span></div>')
+                if is_booked:
+                    rows.append(
+                        f'<div class="bline"><span>💳 pay at hotel</span>'
+                        f'<span><b>{fmt_inr(cash_eur * fx) if fx else f"€{cash_eur:,.2f}"}'
+                        f'</b></span></div>{tax_note}')
+                if not b_pts and cap:
+                    with_cash = (b["booked_eur"] - cap * 0.02 + flat_eur)
+                    hint = ("with points: " if is_booked
+                            else "if booked with points: ")
+                    rows.append(
+                        f'<div class="tiny pts">↳ {hint}{cap:,} pts + '
+                        f'{fmt_inr(with_cash * fx) if fx else f"€{with_cash:,.2f}"}'
+                        + (" — needs rebooking</div>" if is_booked
+                           else "</div>"))
+            booked_box = (f'<div class="pbox"><div class="plabel">'
+                          f'{"Booked" if is_booked else "Noted price"}</div>'
+                          f'<div class="pval">{fmt_inr(eff_booked)}</div>'
+                          f'{"".join(rows)}</div>')
         else:
-            booked_box = price_box("Booked", None, None,
-                                   extra=booked_extra, empty="not booked")
+            booked_box = price_box("Booked", None, None, empty="not booked")
         remove_btn = ""
         edit_box = ""
         if interactive:
@@ -943,6 +928,9 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .pval {{ font-size:1.22rem; font-weight:680; letter-spacing:-.01em; }}
 .pval.dim {{ color:var(--muted); font-size:.95rem; font-weight:500; }}
 .tiny {{ font-size:.79rem; color:var(--muted); margin-top:.12rem; }}
+.bline {{ display:flex; justify-content:space-between; gap:.6rem;
+  font-size:.84rem; margin-top:.28rem; }}
+.bline span:first-child {{ color:var(--muted); }}
 .insights {{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.6rem 0 .1rem; }}
 .insights span {{ font-size:.8rem; padding:.28rem .65rem; border-radius:8px;
   background:color-mix(in srgb, var(--accent) 8%, transparent);
