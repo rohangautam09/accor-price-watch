@@ -613,8 +613,11 @@ def render_page(config, history, fx, interactive=False, public=False,
                      f'than {fmt_inr(threshold)} since the last run</div>')
     else:
         changebar = ""
-    fx_note = (f"1 EUR ≈ ₹{fx:,.2f} (live rate; INR figures are approximate "
-               f"conversions of logged-out member prices)" if fx else
+    fx_src = (latest or {}).get("fx_source")
+    fx_note = ((f"1 EUR = ₹{fx:,.4f} — Accor's own conversion rate, so ₹ "
+                f"figures match their pages" if fx_src == "accor" else
+                f"1 EUR ≈ ₹{fx:,.2f} (market rate; Accor converts at its own "
+                f"slightly different rate)") if fx else
                "FX rate unavailable — INR conversion skipped")
 
     controls = ""

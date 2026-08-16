@@ -287,6 +287,32 @@ async def fast_fetch(page, tmpl, booking):
     return offers, status
 
 
+async def accor_fx_rate(page, tmpl, booking):
+    """Accor converts with its own (DEVISEA) rate, not the market rate.
+    Ask for the same stay in INR and in EUR and divide — that reproduces
+    their booking pages to the rupee."""
+    mapping = {tmpl["seed_code"]: booking["code"],
+               tmpl["seed_date_in"]: booking["dateIn"],
+               tmpl["seed_date_out"]: date_out(booking["dateIn"],
+                                               booking["nights"])}
+
+    def first_amount(data):
+        sel = (data.get("data") or {}).get("hotelOffers") or {}
+        offers = (sel.get("offersSelection") or {}).get("offers") or []
+        return offers[0]["pricing"]["main"]["amount"] if offers else None
+
+    try:
+        inr = first_amount(await api_fetch(page, tmpl, tmpl["offers_post"],
+                                           mapping, currency="INR"))
+        eur = first_amount(await api_fetch(page, tmpl, tmpl["offers_post"],
+                                           mapping, currency="EUR"))
+        if inr and eur:
+            return inr / eur
+    except Exception as e:
+        print(f"  accor fx probe failed: {e}")
+    return None
+
+
 async def fetch_room_names(page, tmpl, code):
     if not tmpl.get("hotel_post"):
         return {}
@@ -517,6 +543,11 @@ async def main(only=None):
         seed_page = await ctx.new_page()
         tmpl = await capture_templates(seed_page, bookings[0])
         if tmpl:
+            afx = await accor_fx_rate(seed_page, tmpl, bookings[0])
+            if afx:
+                print(f"accor rate: ₹{afx:.4f}/€ (market ₹{fx:.4f})")
+                rates["INR"] = afx * rates.get("EUR", 1)
+                fx = afx
             rooms_cache.setdefault(bookings[0]["code"], {}).update(
                 extract_room_names(tmpl["bodies"]))
             sem = asyncio.Semaphore(6)
@@ -643,7 +674,8 @@ async def main(only=None):
     history.append({"date": today,
                     "checked_at": dt.datetime.now().isoformat(timespec="seconds"),
                     "duration_seconds": duration,
-                    "fx_inr_per_eur": fx, "hotels": merged})
+                    "fx_inr_per_eur": fx, "fx_source": "accor",
+                    "hotels": merged})
     HISTORY_FILE.write_text(json.dumps(history, indent=1))
     DASHBOARD_FILE.write_text(render_page(CONFIG, history, fx))
     publish_public(history, fx)
