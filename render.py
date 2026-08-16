@@ -78,8 +78,9 @@ def points_line(eur, fx, tax_pct=0.0):
     pts = steps * 2000
     rem = eur - steps * 40
     rem_inr = f" ≈ {fmt_inr(rem * fx)}" if fx else ""
-    return (f'<div class="tiny pts">💠 max {pts:,} pts + '
-            f'€{rem:,.2f}{rem_inr} to pay</div>')
+    return (f'<div class="tiny pts">{pts:,} pts + '
+            f'{rem_inr.replace(" ≈ ", "") if rem_inr else f"€{rem:,.2f}"}'
+            f'</div>')
 
 
 def price_box(label, inr_m, inr_s, amount=None, currency="", eur=None,
@@ -203,7 +204,7 @@ def render_page(config, history, fx, interactive=False, public=False,
     if not booked_n:
         coverage = ""
     elif gap <= 0:
-        coverage = (f'<div class="cov ok">✅ Your points cover every booked '
+        coverage = (f'<div class="cov ok">Your points cover every booked '
                     f'stay — {need_pts:,} pts needed, {remaining_pts:,} '
                     f'available ({abs(gap):,} to spare). Cash still due at '
                     f'the hotels (taxes + sub-€40 remainders): '
@@ -211,7 +212,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                     f'{f" ≈ {fmt_inr(cash_left_eur * fx)}" if fx else ""}'
                     f'</strong>{flat_note}</div>')
     else:
-        coverage = (f'<div class="cov short">⚠️ Short by <strong>{gap:,} pts'
+        coverage = (f'<div class="cov short">Short by <strong>{gap:,} pts'
                     f'</strong>{worth_txt(gap)} to fully cover your '
                     f'{booked_n} booked stay(s) — {need_pts:,} pts needed, '
                     f'{remaining_pts:,} available. Cash still due regardless '
@@ -225,11 +226,11 @@ def render_page(config, history, fx, interactive=False, public=False,
 
     due_rows = ""
     if cash_group["n"]:
-        due_rows += (f'<div class="bline duerow"><span>💳 pay in full at the '
+        due_rows += (f'<div class="bline duerow"><span>pay in full at the '
                      f'hotel · {cash_group["n"]} stay(s)</span>'
                      f'<span><b>{money(cash_group["eur"])}</b></span></div>')
     if pts_group["n"]:
-        due_rows += (f'<div class="bline duerow"><span>💠 points + cash · '
+        due_rows += (f'<div class="bline duerow"><span>points + cash · '
                      f'{pts_group["n"]} stay(s)'
                      f'<br><small>{pts_on_bookings:,} pts applied'
                      f'{f" — worth {fmt_inr(pts_inr(pts_on_bookings, fx))}" if fx else ""}'
@@ -237,7 +238,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                      f'<span><b>{money(pts_group["eur"])}</b></span></div>')
     due_bar = "" if (public or not booked_n) else f"""
 <div class="duebar">
-  <div class="duehead">💳 Cash still to pay at the hotels
+  <div class="duehead">Cash still to pay at the hotels
     <strong>{money(due_eur)}</strong></div>
   {due_rows}
   <small>across {booked_n} booked stay(s) · city taxes included</small>
@@ -245,7 +246,7 @@ def render_page(config, history, fx, interactive=False, public=False,
 
     points_bar = "" if public else f"""
 <div class="pointsbar">
-  <span>💠 ALL points — total: {total_widget}{worth_txt(total_pts)}</span>
+  <span>ALL points — total: {total_widget}{worth_txt(total_pts)}</span>
   <span>used in bookings: <strong>{used_pts:,}</strong>{worth_txt(used_pts)}</span>
   <span>remaining: <strong>{remaining_pts:,}</strong>{worth_txt(remaining_pts)}</span>
   <br><small>2,000 pts = €40{f" ≈ {fmt_inr(40 * fx)}" if fx else ""}
@@ -275,11 +276,11 @@ def render_page(config, history, fx, interactive=False, public=False,
             for e in reversed(ledger))
         savings_bar = f"""
 <div class="savingsbar">
-  <span>💰 Saved by rebooking: <strong>€{total_eur:,.2f}</strong>
+  <span>Saved by rebooking: <strong>€{total_eur:,.2f}</strong>
     {f"≈ <strong>{fmt_inr(total_eur * fx)}</strong>" if fx else ""}</span>
   <span><small>{len(wins)} successful rebooking(s) ·
     {len(ledger)} tracked</small></span>
-  <details><summary>see every rebooking</summary>
+  <details><summary>every rebooking</summary>
     <table class="ledger"><thead><tr><th>Date</th><th>Hotel</th>
     <th>Booking</th><th>Price</th><th>Saved</th></tr></thead>
     <tbody>{lines}</tbody></table>
@@ -293,15 +294,19 @@ def render_page(config, history, fx, interactive=False, public=False,
         uid = f'{b["code"]}:{b["dateIn"]}:{int(b["nights"])}'
         pinned = bool(b.get("pinned"))
         is_booked = b.get("status", "booked") == "booked"
-        status_tag = (f'<span class="stag booked">✅ booked</span>'
+        status_tag = (f'<span class="stag booked">booked</span>'
                       if is_booked else
-                      f'<span class="stag track">👀 tracking</span>')
+                      f'<span class="stag track">tracking</span>')
         pts_on_booking = int(b.get("points_used", 0))
         if b.get("booked_inr") and not public:
             status_tag += (
-                f'<span class="stag ptag">💠 {pts_on_booking:,} pts used</span>'
+                f'<span class="stag ptag">{pts_on_booking:,} pts used</span>'
                 if pts_on_booking else
-                '<span class="stag cash">💳 pay at hotel</span>')
+                '<span class="stag cash">cash</span>')
+            if b.get("points_at_hotel"):
+                status_tag += ('<span class="stag hotelpts" title="this hotel '
+                               'accepts ALL points at the desk">points '
+                               'accepted at hotel</span>')
         cur = None
         if latest:
             cur = next((h for h in latest["hotels"]
@@ -342,24 +347,24 @@ def render_page(config, history, fx, interactive=False, public=False,
             if not b["booked_inr"]:
                 badge = '<span class="badge same">watching</span>'
             elif diff < -threshold:
-                badge = (f'<span class="badge drop">▼ {fmt_inr(-diff)} '
+                badge = (f'<span class="badge drop">−{fmt_inr(-diff)} '
                          f'cheaper</span>')
             elif diff > threshold:
-                badge = (f'<span class="badge up">▲ {fmt_inr(diff)} '
+                badge = (f'<span class="badge up">+{fmt_inr(diff)} '
                          f'costlier</span>')
             else:
                 badge = '<span class="badge same">≈ same</span>'
             prev = cur.get("prev") or {}
             if prev:
                 at = prev["at"][5:16].replace("T", " ")
-                badge += (f'<div class="prevrun same">▲▼ vs last run '
+                badge += (f'<div class="prevrun same">vs last run '
                           f'({at})</div>')
             anchor = 'h' + uid.replace(':', '-')
             if b["booked_inr"] and diff < -threshold:
                 cancel = ("" if public or b["booking_no"] in ("—", "")
                           else f' — rebook, then cancel {b["booking_no"]}')
                 summary_drops.append(
-                    f'<a class="ci cidrop" href="#{anchor}">🔥 {b["name"]}: '
+                    f'<a class="ci cidrop" href="#{anchor}">{b["name"]}: '
                     f'{fmt_inr(-diff)} below your booked price '
                     f'(now {fmt_inr(inr_m)}){cancel}</a>')
             pv0 = ap(prev.get(cmp_key) or prev.get("inr_member"))
@@ -367,11 +372,11 @@ def render_page(config, history, fx, interactive=False, public=False,
                 pd0 = inr_m - pv0
                 if pd0 < -threshold:
                     summary_moves.append(
-                        f'<a class="ci cidn" href="#{anchor}">▼ {b["name"]}: '
+                        f'<a class="ci cidn" href="#{anchor}">{b["name"]}: '
                         f'{fmt_inr(-pd0)} down since last run</a>')
                 elif pd0 > threshold:
                     summary_moves.append(
-                        f'<a class="ci ciup" href="#{anchor}">▲ {b["name"]}: '
+                        f'<a class="ci ciup" href="#{anchor}">{b["name"]}: '
                         f'{fmt_inr(pd0)} up since last run</a>')
             currency = cur.get("currency") or ""
             eur_m = cur.get("eur_member")
@@ -411,40 +416,12 @@ def render_page(config, history, fx, interactive=False, public=False,
                                   tax_pct=tax_pct,
                                   prev_val=ap(prev.get("inr_nf_bb_member")))
             room_name = cur.get("room_name", cur.get("room", ""))
-            if app_pct:
-                insights.append(f'📱 {app_pct:g}% app discount applied '
-                                f'to member prices')
-            if cur.get("alt_scan_days"):
-                alt = cur.get("alt_best")
-                if alt:
-                    alt_d = dt.date.fromisoformat(alt["dateIn"])
-                    gain = ap(cur["inr_member"]) - ap(alt["inr_member"])
-                    insights.append(
-                        f'📅 cheaper start: {alt_d.strftime("%a %d %b")} · '
-                        f'{fmt_inr(ap(alt["inr_member"]))} '
-                        f'<b>(−{fmt_inr(gain)})</b>')
-                else:
-                    insights.append(
-                        f'📅 your start date is the cheapest '
-                        f'within ±{cur["alt_scan_days"]} days')
-            vals = [(d, v) for d, v in series if v is not None]
-            if len(vals) > 1:
-                low_d, low_v = min(vals, key=lambda x: x[1])
-                insights.append(
-                    f'📉 lowest tracked: {fmt_inr(low_v)} '
-                    f'({dt.datetime.fromisoformat(low_d).strftime("%d %b")})')
-            floor = floors.get(f'{b["code"]}:{b["dateIn"]}')
-            over_floor = None
-            if floor:
-                over_floor = (cur["inr_member"] / floor["inr"] - 1) * 100
-                fd = dt.date.fromisoformat(floor["dateIn"])
-                insights.append(
-                    f'🧭 6-mo floor: {fmt_inr(ap(floor["inr"]))} '
-                    f'(start {fd.strftime("%d %b")}) — your dates '
-                    f'<b>+{over_floor:.0f}%</b>')
 
             # recommendation score (0–100): affordability, location,
             # breakfast economics, value vs floor, and beating the booking
+            floor = floors.get(f'{b["code"]}:{b["dateIn"]}')
+            over_floor = ((cur["inr_member"] / floor["inr"] - 1) * 100
+                          if floor else None)
             per_night = inr_m / max(b["nights"], 1)
             score = 70.0
             parts = []
@@ -486,7 +463,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                                       nights=b["nights"],
                                       adults=config["adults"])
         b_pts = int(b.get("points_used", 0))
-        meal_txt = "🍳 incl. breakfast" if wants_bb else "room only"
+        meal_txt = "breakfast included" if wants_bb else "room only"
         if b["booked_inr"]:
             flat_eur = (float(b.get("city_tax_flat_eur") or 0)
                         * config["adults"] * int(b["nights"]))
@@ -501,12 +478,12 @@ def render_page(config, history, fx, interactive=False, public=False,
                             f' city tax</span>' if flat_eur else "")
                 if is_booked and b_pts:
                     rows.append(
-                        f'<div class="bline"><span>💠 {b_pts:,} pts</span>'
+                        f'<div class="bline"><span>{b_pts:,} pts</span>'
                         f'<span class="pts">−{fmt_inr(pts_inr(b_pts, fx))}'
                         f'</span></div>')
                 if is_booked:
                     rows.append(
-                        f'<div class="bline"><span>💳 pay at hotel</span>'
+                        f'<div class="bline"><span>pay at hotel</span>'
                         f'<span><b>{fmt_inr(cash_eur * fx) if fx else f"€{cash_eur:,.2f}"}'
                         f'</b></span></div>{tax_note}')
                 if not b_pts and cap:
@@ -514,7 +491,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                     hint = ("with points: " if is_booked
                             else "if booked with points: ")
                     rows.append(
-                        f'<div class="tiny pts">↳ {hint}{cap:,} pts + '
+                        f'<div class="tiny pts">{hint}{cap:,} pts + '
                         f'{fmt_inr(with_cash * fx) if fx else f"€{with_cash:,.2f}"}'
                         + (" — needs rebooking</div>" if is_booked
                            else "</div>"))
@@ -540,10 +517,7 @@ def render_page(config, history, fx, interactive=False, public=False,
             remove_btn = (move_btns
                           + f'<button class="link" onclick="'
                           f"togglePin('{b['code']}','{b['dateIn']}',{int(b['nights'])})\">"
-                          f'{"📌 unpin" if pinned else "📌 pin to top"}</button>'
-                          f'<button class="link" onclick="'
-                          f"floorScan('{b['code']}','{b['dateIn']}',{int(b['nights'])})\">"
-                          f'🧭 6-mo floor</button>'
+                          f'{"unpin" if pinned else "pin"}</button>'
                           f'<button class="link danger" onclick="'
                           f"removeHotel('{b['code']}','{b['dateIn']}',{int(b['nights'])},"
                           f"'{safe_name}')\">remove</button>")
@@ -576,6 +550,12 @@ def render_page(config, history, fx, interactive=False, public=False,
                   <input type="checkbox" name="breakfast"
                          {"checked" if wants_bb else ""}
                          style="width:auto"> Breakfast included</label>
+                <label style="grid-auto-flow:column; justify-content:start;
+                              align-items:center; gap:.4rem">
+                  <input type="checkbox" name="points_at_hotel"
+                         {"checked" if b.get("points_at_hotel") else ""}
+                         style="width:auto"> Hotel accepts points at the
+                  desk</label>
                 <button type="submit" class="primary">Save</button>
               </form></details>"""
         booking_line = ("booked" if public else
@@ -584,10 +564,7 @@ def render_page(config, history, fx, interactive=False, public=False,
         city_part = f'{b["city"]} · ' if b.get("city") else ""
         room_part = (f'<div class="hmeta">room: {room_name}</div>'
                      if room_name else "")
-        insights_html = ("" if not insights else
-                         '<div class="insights">'
-                         + "".join(f"<span>{s}</span>" for s in insights)
-                         + "</div>")
+        insights_html = ""
         trend = spark(series, eff_booked)
         trend_html = f'<div class="trend">{trend}</div>' if trend else ""
         body_rows.append(f"""<div class="card{' pinned' if pinned else ''}"
@@ -597,12 +574,12 @@ def render_page(config, history, fx, interactive=False, public=False,
   data-diff="{diff if diff is not None and b["booked_inr"] else 9e12:.0f}">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">{'📌 ' if pinned else ''}{b["name"]}{status_tag}{f'<span class="apptag">📱 {app_pct:g}% app discount</span>' if app_pct else ""}</div>
+      <div class="hname">{'<span class="pinmark">◆</span> ' if pinned else ''}{b["name"]}{status_tag}{f'<span class="stag apptag">{app_pct:g}% app rate</span>' if app_pct else ""}</div>
       <div class="hmeta">{city_part}{fmt_dates(b["dateIn"], b["nights"])} ·
-        {b["nights"]} night(s) · {booking_line}{f' · 📍 {dist_km:.1f} km from centre' if dist_km is not None else ''}</div>
+        {b["nights"]} night(s) · {booking_line}{f' · {dist_km:.1f} km from centre' if dist_km is not None else ''}</div>
       {room_part}
     </div>
-    <div class="cright">{badge}{f'<div class="score" title="{score_title}">★ {score:.0f}/100</div>' if score is not None else ''}{trend_html}</div>
+    <div class="cright">{badge}{f'<div class="score" title="{score_title}">{score:.0f}</div>' if score is not None else ''}{trend_html}</div>
   </div>
   <div class="prices">{booked_box}{flex_box}{bb_box}{nf_box}{nf_bb_box}</div>
   {insights_html}
@@ -631,7 +608,7 @@ def render_page(config, history, fx, interactive=False, public=False,
         changebar = ('<div class="changebar">'
                      + "".join(summary_drops + summary_moves) + "</div>")
     elif latest:
-        changebar = (f'<div class="changebar quiet">😴 nothing moved more '
+        changebar = (f'<div class="changebar quiet">nothing moved more '
                      f'than {fmt_inr(threshold)} since the last run</div>')
     else:
         changebar = ""
@@ -647,7 +624,7 @@ def render_page(config, history, fx, interactive=False, public=False,
     if cloud:
         controls = f"""
 <div class="controls">
-  <button id="checkbtn" class="primary" onclick="cloudRefresh()">↻ Refresh prices</button>
+  <button id="checkbtn" class="primary" onclick="cloudRefresh()">refresh prices</button>
   <span id="status"></span>
   <div id="setup" class="setupbox" hidden>
     <b>One-time setup for the refresh button</b>
@@ -721,9 +698,9 @@ async function cloudRefresh(){{
     if interactive:
         controls = """
 <div class="controls">
-  <button id="checkbtn" class="primary" onclick="runCheck()">↻ Check prices now</button>
+  <button id="checkbtn" class="primary" onclick="runCheck()">check prices</button>
   <span id="status"></span>
-  <details id="addbox"><summary>＋ Add a hotel</summary>
+  <details id="addbox"><summary>add a hotel</summary>
     <form onsubmit="return addHotel(event)">
       <label>Hotel page link (from all.accor.com) or hotel code
         <input name="code_or_url" required oninput="prefillFromUrl(this)"
@@ -738,7 +715,7 @@ async function cloudRefresh(){{
       <button type="submit" class="primary">Add to watch list</button>
     </form>
   </details>
-  <details><summary>⚙ Settings</summary>
+  <details><summary>settings</summary>
     <form onsubmit="return saveSettings(event)">
       <label>Scan ± days around each check-in for cheaper start dates
         (0 = off, max 14)
@@ -882,12 +859,13 @@ async function removeHotel(code,dateIn,nights,name){
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accor price watch</title>
 <style>
-:root {{ --bg:#f6f7f9; --card:#ffffff; --box:#f8f9fb; --fg:#16181d;
-  --muted:#7a8089; --line:#e4e6ea; --accent:#0a6cdf;
-  --drop:#0a8f3c; --up:#c0392b; }}
+:root {{ --bg:#fbfbfc; --card:#ffffff; --box:#fafafb; --fg:#17181b;
+  --muted:#8a8f98; --line:#ebecef; --accent:#2f6df6;
+  --drop:#177245; --up:#a5372c; }}
 @media (prefers-color-scheme: dark) {{
-  :root {{ --bg:#0e0f12; --card:#17181c; --box:#1d1f24; --fg:#e8e9eb;
-    --muted:#9aa0a8; --line:#2a2c32; --accent:#4f9cf0; }} }}
+  :root {{ --bg:#0c0d0f; --card:#141518; --box:#191a1e; --fg:#e9eaec;
+    --muted:#8b9099; --line:#25272c; --accent:#6ea8fe;
+    --drop:#4ec07f; --up:#e0776a; }} }}
 * {{ box-sizing:border-box; }}
 body {{ font:15px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
   background:var(--bg); color:var(--fg); max-width:1360px;
@@ -904,49 +882,46 @@ a {{ color:var(--accent); text-decoration:none; }}
 a:hover {{ text-decoration:underline; }}
 .pts {{ color:color-mix(in srgb, var(--accent) 80%, var(--muted)); }}
 .card {{ background:var(--card); border:1px solid var(--line);
-  border-radius:16px; padding:1.05rem 1.2rem; margin-bottom:.85rem;
-  box-shadow:0 1px 2px rgba(0,0,0,.04); }}
-.card.pinned {{ border-color:color-mix(in srgb, var(--accent) 45%,
-  var(--line)); box-shadow:0 1px 3px color-mix(in srgb, var(--accent) 18%,
-  transparent); }}
+  border-radius:12px; padding:1.1rem 1.15rem; margin-bottom:.6rem; }}
+.card:hover {{ border-color:color-mix(in srgb, var(--fg) 16%, var(--line)); }}
+.card.pinned {{ border-color:color-mix(in srgb, var(--fg) 22%, var(--line)); }}
+.pinmark {{ color:var(--muted); font-size:.7em; vertical-align:2px; }}
 .chead {{ display:flex; justify-content:space-between; gap:1rem;
   align-items:flex-start; flex-wrap:wrap; }}
 .cinfo {{ min-width:0; flex:1 1 260px; }}
 .hname {{ overflow-wrap:anywhere; }}
 .hname {{ font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }}
 .hmeta {{ color:var(--muted); font-size:.84rem; margin-top:.1rem; }}
-.stag {{ margin-left:.5rem; padding:.14rem .55rem; border-radius:99px;
-  font-size:.72rem; font-weight:600; vertical-align:2px; white-space:nowrap; }}
-.stag.booked {{ background:color-mix(in srgb, var(--drop) 13%, transparent);
-  color:var(--drop); }}
-.stag.track {{ background:color-mix(in srgb, var(--muted) 16%, transparent);
-  color:var(--muted); }}
-.stag.ptag {{ background:color-mix(in srgb, var(--accent) 13%, transparent);
-  color:var(--accent); }}
-.stag.cash {{ background:color-mix(in srgb, var(--amber, #b8860b) 16%,
-  transparent); color:color-mix(in srgb, var(--fg) 70%, var(--up)); }}
-.cov {{ margin-top:.6rem; padding:.5rem .8rem; border-radius:10px;
-  font-size:.9rem; }}
-.cov.ok {{ background:color-mix(in srgb, var(--drop) 12%, transparent);
-  color:var(--drop); }}
-.cov.short {{ background:color-mix(in srgb, var(--amber, #b8860b) 14%,
-  transparent); color:color-mix(in srgb, var(--up) 75%, var(--fg)); }}
+.stag {{ margin-left:.5rem; padding:.1rem .45rem; border-radius:5px;
+  font-size:.7rem; font-weight:600; vertical-align:2px; white-space:nowrap;
+  letter-spacing:.02em; text-transform:lowercase;
+  border:1px solid var(--line); color:var(--muted); background:none; }}
+.stag.booked {{ color:var(--drop);
+  border-color:color-mix(in srgb, var(--drop) 35%, var(--line)); }}
+.stag.track {{ color:var(--muted); }}
+.stag.ptag {{ color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 35%, var(--line)); }}
+.stag.hotelpts {{ color:var(--accent); border-style:dashed;
+  border-color:color-mix(in srgb, var(--accent) 45%, var(--line)); }}
+.stag.cash {{ color:var(--muted); }}
+.cov {{ margin-top:.6rem; padding-top:.5rem; font-size:.88rem;
+  border-top:1px solid var(--line); }}
+.cov.ok {{ color:var(--drop); }}
+.cov.short {{ color:var(--up); }}
 details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
-.apptag {{ margin-left:.5rem; padding:.14rem .55rem; border-radius:99px;
-  font-size:.72rem; font-weight:600; vertical-align:2px; white-space:nowrap;
-  background:color-mix(in srgb, var(--accent) 12%, transparent);
-  color:var(--accent); }}
+
 .cright {{ text-align:right; flex:0 0 auto; max-width:100%;
   display:flex; flex-direction:column; align-items:flex-end; gap:.15rem; }}
-.trend {{ margin-top:.4rem; opacity:.9; }}
+.trend {{ margin-top:.25rem; opacity:.55; }}
+.cright {{ gap:.1rem; }}
 .prices {{ display:grid;
   grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
   gap:.55rem; margin:.85rem 0 .15rem; }}
-.pbox {{ background:var(--box); border:1px solid var(--line);
-  border-radius:11px; padding:.6rem .8rem .65rem; }}
-.plabel {{ font-size:.68rem; font-weight:600; text-transform:uppercase;
-  letter-spacing:.07em; color:var(--muted); margin-bottom:.2rem; }}
+.pbox {{ background:none; border:1px solid var(--line); border-radius:9px;
+  padding:.55rem .75rem .6rem; }}
+.plabel {{ font-size:.67rem; font-weight:500; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--muted); margin-bottom:.25rem; }}
 .pval {{ font-size:1.22rem; font-weight:680; letter-spacing:-.01em; }}
 .pval.dim {{ color:var(--muted); font-size:.95rem; font-weight:500; }}
 .tiny {{ font-size:.79rem; color:var(--muted); margin-top:.12rem; }}
@@ -960,10 +935,11 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .insights b {{ color:var(--accent); }}
 .cactions {{ display:flex; flex-wrap:wrap; gap:1.1rem; align-items:baseline;
   margin-top:.65rem; font-size:.86rem; }}
-.badge {{ padding:.22rem .65rem; border-radius:99px; font-size:.84em;
-  white-space:nowrap; font-weight:600; }}
-.prevrun {{ display:inline-block; margin-top:.35rem; padding:.15rem .55rem;
-  border-radius:8px; font-size:.76rem; white-space:nowrap; }}
+.badge {{ padding:.15rem .5rem; border-radius:6px; font-size:.82em;
+  white-space:nowrap; font-weight:600; background:none;
+  border:1px solid var(--line); }}
+.prevrun {{ display:inline-block; margin-top:.3rem; font-size:.74rem;
+  white-space:nowrap; color:var(--muted); }}
 .failbar {{ margin:.5rem 0 .8rem; padding:.6rem .9rem;
   border-radius:10px; font-size:.9rem;
   background:color-mix(in srgb, var(--up) 12%, transparent);
@@ -971,40 +947,33 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .changebar {{ display:flex; flex-direction:column; gap:.35rem;
   margin:.4rem 0 .8rem; }}
 .changebar.quiet {{ color:var(--muted); font-size:.86rem; }}
-.ci {{ display:block; padding:.5rem .9rem; border-radius:10px;
-  font-size:.92rem; text-decoration:none; }}
+.ci {{ display:block; padding:.5rem .9rem; border-radius:9px;
+  font-size:.92rem; text-decoration:none; border:1px solid var(--line); }}
 .ci:hover {{ text-decoration:none; filter:brightness(1.05); }}
-.ci.cidrop {{ background:color-mix(in srgb, var(--drop) 13%, transparent);
-  color:var(--drop); font-weight:650; }}
-.ci.cidn {{ background:color-mix(in srgb, var(--drop) 7%, transparent);
-  color:var(--drop); }}
-.ci.ciup {{ background:color-mix(in srgb, var(--up) 7%, transparent);
-  color:color-mix(in srgb, var(--up) 85%, var(--fg)); }}
+.ci.cidrop {{ color:var(--drop); font-weight:600;
+  border-color:color-mix(in srgb, var(--drop) 40%, var(--line)); }}
+.ci.cidn {{ color:var(--drop); }}
+.ci.ciup {{ color:var(--muted); }}
 .card {{ scroll-margin-top:1rem; }}
 .d {{ font-size:.74rem; font-weight:650; vertical-align:2px;
   white-space:nowrap; }}
 .d.dn {{ color:var(--drop); }}
 .d.rs {{ color:var(--up); }}
 .d.sm {{ color:var(--muted); font-weight:500; }}
-.drop {{ background:color-mix(in srgb, var(--drop) 14%, transparent);
-  color:var(--drop); }}
-.up {{ background:color-mix(in srgb, var(--up) 11%, transparent);
-  color:color-mix(in srgb, var(--up) 85%, var(--fg)); }}
-.same, .err {{ background:color-mix(in srgb, var(--muted) 14%, transparent);
-  color:var(--muted); font-weight:500; }}
+.drop {{ color:var(--drop);
+  border-color:color-mix(in srgb, var(--drop) 40%, var(--line)); }}
+.up {{ color:var(--up); }}
+.same, .err {{ color:var(--muted); font-weight:500; }}
 .controls {{ margin:1rem 0 .4rem; }}
 .duehead {{ display:flex; justify-content:space-between; gap:1rem;
   align-items:baseline; font-weight:600; margin-bottom:.5rem; }}
 .duehead strong {{ font-size:1.15rem; }}
 .duerow {{ font-size:.9rem; padding:.35rem 0;
   border-top:1px solid color-mix(in srgb, var(--accent) 18%, transparent); }}
-.duebar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
-  background:color-mix(in srgb, var(--accent) 8%, var(--card));
-  border:1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
-  font-size:1.02rem; }}
-.savingsbar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem; border-radius:14px;
-  background:color-mix(in srgb, var(--drop) 9%, var(--card));
-  border:1px solid color-mix(in srgb, var(--drop) 30%, var(--line)); }}
+.duebar {{ margin:1rem 0 .5rem; padding:.9rem 1.1rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); font-size:1rem; }}
+.savingsbar {{ margin:.5rem 0; padding:.9rem 1.1rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); }}
 .savingsbar > span {{ margin-right:1.4rem; }}
 .savingsbar summary {{ color:var(--drop); }}
 table.ledger {{ border-collapse:collapse; width:100%; margin-top:.7rem;
@@ -1014,18 +983,16 @@ table.ledger th, table.ledger td {{ text-align:left; padding:.35rem .6rem;
 table.ledger th {{ color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }}
 td.savepos {{ color:var(--drop); font-weight:650; }}
-.pointsbar {{ margin:1rem 0 .4rem; padding:.85rem 1.1rem;
-  border:1px solid var(--line); border-radius:14px; background:var(--card); }}
+.pointsbar {{ margin:.5rem 0; padding:.9rem 1.1rem;
+  border:1px solid var(--line); border-radius:12px; background:var(--card); }}
 .pointsbar > span {{ margin-right:1.5rem; white-space:nowrap; }}
 .pointsbar input {{ padding:.3rem .45rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
 .chip {{ display:inline-block; padding:.12rem .6rem; margin:.15rem .25rem 0 0;
   border:1px solid var(--line); border-radius:99px; white-space:nowrap;
   background:var(--box); }}
-.lastcheck {{ display:inline-block; margin:.5rem 0 .3rem;
-  padding:.45rem 1rem; border-radius:99px; font-weight:600; font-size:.92rem;
-  background:color-mix(in srgb, var(--accent) 11%, transparent);
-  color:var(--accent); }}
+.lastcheck {{ display:inline-block; margin:.45rem 0 .25rem;
+  font-size:.85rem; color:var(--muted); font-variant-numeric:tabular-nums; }}
 .searchbar {{ margin:.9rem 0 1.1rem; display:flex; align-items:center;
   gap:.8rem; position:sticky; top:0; z-index:5;
   padding:.6rem .7rem; border-radius:14px;
@@ -1045,10 +1012,10 @@ td.savepos {{ color:var(--drop); font-weight:650; }}
 .searchbar select {{ padding:.5rem .7rem; border:1px solid var(--line);
   border-radius:10px; background:var(--card); color:var(--fg);
   font-size:.92em; cursor:pointer; }}
-.score {{ display:inline-block; margin:.35rem 0 0 .5rem; padding:.15rem .6rem;
-  border-radius:99px; font-size:.78rem; font-weight:650; cursor:help;
-  background:color-mix(in srgb, var(--accent) 10%, transparent);
-  color:var(--accent); }}
+.score {{ display:inline-block; margin:.3rem 0 0 .5rem; font-size:.75rem;
+  font-weight:600; cursor:help; color:var(--muted);
+  font-variant-numeric:tabular-nums; }}
+.score::after {{ content:" / 100"; font-weight:400; opacity:.6; }}
 details.rowedit {{ margin:0; }}
 details.rowedit summary {{ font-size:.86rem; }}
 details.rowedit form {{ max-width:250px; padding:.75rem; }}
@@ -1130,13 +1097,11 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 </style></head><body>
 <h1>Accor price watch</h1>
 <div class="hmeta">{subtitle}</div>
-<div class="lastcheck">🕑 Last checked: <span id="stamp">{checked}</span></div>
+<div class="lastcheck">Last checked: <span id="stamp">{checked}</span></div>
 {failbar}
 {changebar}
-<p class="intro">{fx_note}<br>
-On a drop: <b>book the new rate first, then cancel the old booking</b>.
-Dashed line in the trend = your booked price. 💠 lines show the max points
-usable (2,000-pt steps) + the cash left to pay.</p>
+<p class="intro">{fx_note} · on a drop, book the new rate before
+cancelling the old one.</p>
 {due_bar}
 {savings_bar}
 {points_bar}
@@ -1145,11 +1110,11 @@ usable (2,000-pt steps) + the cash left to pay.</p>
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"
          oninput="filterRows(this.value)">
   <select id="sortsel" onchange="sortCards(this.value)">
-    <option value="rec">Sort: ★ recommended</option>
-    <option value="plow">Sort: price low → high</option>
-    <option value="phigh">Sort: price high → low</option>
-    <option value="drop">Sort: best vs booked</option>
-    <option value="orig">Sort: my order</option>
+    <option value="rec">sort: recommended</option>
+    <option value="plow">sort: price ↑</option>
+    <option value="phigh">sort: price ↓</option>
+    <option value="drop">sort: best vs booked</option>
+    <option value="orig">sort: my order</option>
   </select>
   <small><span id="rowcount">{len(config["bookings"])}</span> shown</small>
 </div>
