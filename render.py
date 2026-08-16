@@ -233,7 +233,7 @@ def render_page(config, history, fx, interactive=False, public=False,
     else:
         total_widget = f"<strong>{total_pts:,}</strong>"
     # what you will actually pay, and whether points could cover more
-    need_pts = cash_left_eur = 0
+    need_pts = 0
     due_eur = pts_on_bookings = 0        # actual, given points already applied
     cash_group = {"eur": 0.0, "n": 0}    # paid entirely at the hotel
     pts_group = {"eur": 0.0, "n": 0}     # part points, rest at the hotel
@@ -247,8 +247,6 @@ def render_page(config, history, fx, interactive=False, public=False,
         need_pts += max(cap - used, 0)
         flat = (float(b.get("city_tax_flat_eur") or 0)
                 * config["adults"] * int(b["nights"]))
-        # same basis as due_eur below, so the two totals are comparable
-        cash_left_eur += max(b["booked_eur"] - cap * 0.02, 0) + flat
         pts_on_bookings += used
         stay_due = max(b["booked_eur"] - used * 0.02, 0) + flat
         due_eur += stay_due
@@ -284,14 +282,6 @@ def render_page(config, history, fx, interactive=False, public=False,
         else:
             rows += covrow("you have", remaining_pts)
             rows += covrow("still short by", gap, strong=True)
-        rows += covrow("cash at the hotels would then be",
-                       eur=cash_left_eur, strong=True)
-        cut = fmt_inr((due_eur - cash_left_eur) * fx) if fx else \
-            f"€{due_eur - cash_left_eur:,.2f}"
-        rows += (f'<div class="covfoot">that is {cut} less than the '
-                 f'{fmt_inr(due_eur * fx) if fx else f"€{due_eur:,.2f}"} '
-                 f'you owe today, because more of each stay would be paid '
-                 f'in points instead of cash.</div>')
         coverage = (f'<div class="cov {"ok" if gap <= 0 else "short"}">'
                     f'<div class="covhead">{head}<small> — if you put the '
                     f'most points Accor allows on all {booked_n} booked '
@@ -1037,7 +1027,6 @@ a:hover {{ text-decoration:underline; }}
 .cov.short .covhead {{ color:var(--up); }}
 .covhead {{ margin-bottom:.35rem; }}
 .covhead small {{ color:var(--muted); }}
-.covfoot {{ margin-top:.35rem; color:var(--muted); font-size:.84rem; }}
 .covrow {{ display:grid; grid-template-columns:1fr auto auto;
   gap:.4rem 1.1rem; padding:.18rem 0; color:var(--muted); }}
 .covrow .covpts {{ font-variant-numeric:tabular-nums; color:var(--fg);
