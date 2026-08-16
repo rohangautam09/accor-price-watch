@@ -478,10 +478,17 @@ def render_page(config, history, fx, interactive=False, public=False,
                         f'<div class="tiny pts">💠 {b_pts:,} pts used · '
                         f'€{cash_due:,.2f} cash{flat_txt}</div>')
                 elif is_booked:                 # booked, paid in cash
+                    cash_after = b["booked_eur"] - cap * 0.02
+                    with_pts = (
+                        f'<div class="tiny pts">with points it would be '
+                        f'≈<b>{cap:,} pts</b> + €{cash_after:,.2f} cash'
+                        f'{f" ≈ {fmt_inr(cash_after * fx)}" if fx else ""}'
+                        f'{flat_txt} — needs rebooking</div>'
+                        if cap else "")
                     eur_line += (
                         f'<div class="tiny">💳 no points used · '
-                        f'€{b["booked_eur"]:,.2f} cash{flat_txt}'
-                        f'<br>could have used up to {cap:,} pts</div>')
+                        f'€{b["booked_eur"]:,.2f} cash{flat_txt}</div>'
+                        f'{with_pts}')
                 else:                           # only tracking it
                     cash_after = b["booked_eur"] - cap * 0.02
                     eur_line += (
