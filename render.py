@@ -699,7 +699,6 @@ async function cloudRefresh(){{
         controls = """
 <div class="controls">
   <button id="checkbtn" class="primary" onclick="runCheck()">check prices</button>
-  <span id="status"></span>
   <details id="addbox"><summary>add a hotel</summary>
     <form onsubmit="return addHotel(event)">
       <label>Hotel page link (from all.accor.com) or hotel code
@@ -715,6 +714,7 @@ async function cloudRefresh(){{
       <button type="submit" class="primary">Add to watch list</button>
     </form>
   </details>
+  <span id="status"></span>
   <details><summary>settings</summary>
     <form onsubmit="return saveSettings(event)">
       <label>Scan ± days around each check-in for cheaper start dates
@@ -964,7 +964,21 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-color:color-mix(in srgb, var(--drop) 40%, var(--line)); }}
 .up {{ color:var(--up); }}
 .same, .err {{ color:var(--muted); font-weight:500; }}
-.controls {{ margin:1rem 0 .4rem; }}
+.controls {{ margin:1.1rem 0 .2rem; display:flex; flex-wrap:wrap;
+  align-items:start; gap:.5rem; }}
+.controls > * {{ margin:0; }}
+.controls > details {{ margin:0; }}
+.controls > details > summary {{ list-style:none; cursor:pointer;
+  display:flex; align-items:center; height:2.25rem; padding:0 .95rem;
+  border:1px solid var(--line); border-radius:9px;
+  font-size:.92rem; color:var(--fg); background:var(--card);
+  white-space:nowrap; }}
+.controls > details > summary::-webkit-details-marker {{ display:none; }}
+.controls > details > summary:hover {{ border-color:color-mix(in srgb,
+  var(--fg) 25%, var(--line)); }}
+.controls > details[open] > summary {{ border-color:color-mix(in srgb,
+  var(--accent) 45%, var(--line)); color:var(--accent); }}
+.controls #status {{ align-self:center; }}
 .duehead {{ display:flex; justify-content:space-between; gap:1rem;
   align-items:baseline; font-weight:600; margin-bottom:.5rem; }}
 .duehead strong {{ font-size:1.15rem; }}
@@ -1019,9 +1033,9 @@ td.savepos {{ color:var(--drop); font-weight:650; }}
 details.rowedit {{ margin:0; }}
 details.rowedit summary {{ font-size:.86rem; }}
 details.rowedit form {{ max-width:250px; padding:.75rem; }}
-button.primary {{ background:var(--accent); color:#fff; border:none;
-  padding:.55rem 1.1rem; border-radius:9px; font-size:.95em; font-weight:600;
-  cursor:pointer; }}
+button.primary {{ background:var(--fg); color:var(--bg); border:none;
+  height:2.25rem; padding:0 1.1rem; border-radius:9px; font-size:.92rem;
+  font-weight:600; cursor:pointer; letter-spacing:.01em; }}
 button.primary:hover {{ filter:brightness(1.08); }}
 button.primary:active {{ transform:scale(.97); }}
 button.link:active {{ opacity:.55; }}
@@ -1034,7 +1048,6 @@ button.link {{ background:none; border:none; padding:0; cursor:pointer;
 button.link:hover {{ text-decoration:underline; }}
 button.link.danger {{ color:var(--up); }}
 #status {{ margin-left:.8rem; color:var(--muted); font-size:.9rem; }}
-.controls details {{ margin-top:.7rem; }}
 details summary {{ cursor:pointer; color:var(--accent); }}
 details form {{ display:grid; gap:.6rem; max-width:460px; margin-top:.8rem;
   padding:1rem 1.1rem; border:1px solid var(--line); border-radius:12px;
