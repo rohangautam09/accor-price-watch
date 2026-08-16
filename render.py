@@ -83,8 +83,70 @@ def points_line(eur, fx, tax_pct=0.0):
             f'</div>')
 
 
+# ALL Accor+ Explorer subscriber rate.
+#
+# We fetch logged out, so Accor never shows us the subscriber price — only
+# the public rate and the member rate. Comparing a logged-in search against
+# an incognito one (same 20 Amsterdam hotels, same dates, 16 Aug 2026) the
+# rule was exact at 16 of 17 participating hotels: the price you see is the
+# PUBLIC rate less 15%, regardless of whether the member discount on that
+# hotel was 5%, 8% or 10%. So the member rate is the wrong benchmark — at a
+# 10%-member hotel it sits 5.6% above what you would actually pay.
+PLUS_PCT = 15.0
+MEMBER_STEPS = (10.0, 8.0, 5.0)   # Accor's published member discounts
+# member price key -> the public price key beside it
+PAIR = {"inr_member": "inr_standard",
+        "inr_bb_member": "inr_bb_standard",
+        "inr_nf_member": "inr_nf_standard",
+        "inr_nf_bb_member": "inr_nf_bb_standard"}
+
+
+def split_flat(member, standard):
+    """Split a displayed price into (member discount %, non-discountable part).
+
+    Flat city taxes ride inside the total but are never discounted, so
+    member = (1-d)·(standard-flat) + flat. Only one of Accor's published
+    member discounts leaves `flat` both non-negative and small, and that
+    is what identifies d. Verified: ibis budget Brugge resolves to exactly
+    EUR 4.20 per person per night, its real Belgian city tax.
+    """
+    if not member or not standard or member >= standard:
+        return None, 0.0
+    for d in MEMBER_STEPS:
+        flat = (member - (1 - d / 100) * standard) / (d / 100)
+        if -0.02 * standard <= flat <= 0.12 * standard:
+            return d, max(flat, 0.0)
+    return None, 0.0
+
+
+def accor_plus_price(member, standard, pct=PLUS_PCT):
+    """Subscriber price implied by a logged-out member/public pair.
+
+    None when the pair cannot be modelled (no member rate at all, or a
+    discount structure we do not recognise) — better to fall back to the
+    member rate than to invent a drop.
+    """
+    d, flat = split_flat(member, standard)
+    if d is None or pct <= d:
+        return None
+    return flat + (standard - flat) * (1 - pct / 100)
+
+
+def plus_note(cur, b, key="inr_member"):
+    """Sub-label under a price: says which rate the headline figure is."""
+    if b.get("accor_plus", True) is False:
+        return "member"
+    m = cur.get(key)
+    p = accor_plus_price(m, cur.get(PAIR[key]),
+                         float(b.get("accor_plus_pct") or PLUS_PCT))
+    if not p or p >= m:
+        return "member"
+    return f"Accor+ est. · {fmt_inr(m)} member"
+
+
 def price_box(label, inr_m, inr_s, amount=None, currency="", eur=None,
-              fx=None, extra="", empty="–", tax_pct=0.0, prev_val=None):
+              fx=None, extra="", empty="–", tax_pct=0.0, prev_val=None,
+              note=None):
     if inr_m is None:
         return (f'<div class="pbox"><div class="plabel">{label}</div>'
                 f'<div class="pval dim">{empty}</div>{extra}</div>')
@@ -105,7 +167,8 @@ def price_box(label, inr_m, inr_s, amount=None, currency="", eur=None,
         native = ""
     return (f'<div class="pbox"><div class="plabel">{label}</div>'
             f'<div class="pval">{fmt_inr(inr_m)}{delta}</div>'
-            f'<div class="tiny">member · {fmt_inr(inr_s)} standard</div>'
+            f'<div class="tiny">{note or "member"} · '
+            f'{fmt_inr(inr_s)} standard</div>'
             f'{native}{points_line(eur, fx, tax_pct)}{extra}</div>')
 
 
@@ -316,16 +379,30 @@ def render_page(config, history, fx, interactive=False, public=False,
         # manual app-discount: member prices shown as the app would charge
         app_pct = float(b.get("app_discount_pct") or 0)
         disc = 1 - app_pct / 100
+        plus_pct = float(b.get("accor_plus_pct") or PLUS_PCT)
+        plus_on = b.get("accor_plus", True) is not False
+        plus_seen = [False]
 
-        def ap(v):
-            return v * disc if v is not None else None
+        def ap(v, std=None):
+            """A logged-out member price -> what this account actually pays."""
+            if v is None:
+                return None
+            if plus_on and std:
+                p = accor_plus_price(v, std, plus_pct)
+                if p and p < v:
+                    v, plus_seen[0] = p, True
+            return v * disc
+
+        def apk(d, key):
+            """Adjust one price of a stored run, using its public rate."""
+            return ap(d.get(key), d.get(PAIR.get(key)))
 
         series = []
         for d in dates:
             h = next((x for x in runs[d]["hotels"]
                       if x.get("uid", x["code"]) == uid
                       and "inr_member" in x), None)
-            series.append((d, ap(h.get(cmp_key, h.get("inr_member")))
+            series.append((d, apk(h, cmp_key if cmp_key in h else "inr_member")
                            if h else None))
 
         # booked amounts are fixed in EUR; the ₹ figure re-converts at the
@@ -342,7 +419,7 @@ def render_page(config, history, fx, interactive=False, public=False,
         inr_m = None
         diff = None
         if cur and "inr_member" in cur:
-            inr_m = ap(cur.get(cmp_key, cur["inr_member"]))
+            inr_m = apk(cur, cmp_key if cmp_key in cur else "inr_member")
             diff = inr_m - eff_booked
             if not b["booked_inr"]:
                 badge = '<span class="badge same">watching</span>'
@@ -356,18 +433,35 @@ def render_page(config, history, fx, interactive=False, public=False,
                 badge = '<span class="badge same">≈ same</span>'
             prev = cur.get("prev") or {}
             if prev:
+                # the stored blob has no public rates, so read the run it
+                # points at — the Accor+ estimate needs both halves
+                run = runs.get(prev["at"])
+                full = next((x for x in (run or {}).get("hotels", [])
+                             if x.get("uid", x["code"]) == uid), None)
+                if full:
+                    prev = {**prev, **full}
+                else:
+                    # that run was merged away by a later partial check; a
+                    # hotel's discount structure holds, so price the old
+                    # member rates off today's member/public ratio
+                    prev = dict(prev)
+                    for mk, sk in PAIR.items():
+                        if prev.get(mk) and cur.get(mk) and cur.get(sk):
+                            prev[sk] = prev[mk] * cur[sk] / cur[mk]
                 at = prev["at"][5:16].replace("T", " ")
                 badge += (f'<div class="prevrun same">vs last run '
                           f'({at})</div>')
             anchor = 'h' + uid.replace(':', '-')
             if b["booked_inr"] and diff < -threshold:
-                cancel = ("" if public or b["booking_no"] in ("—", "")
-                          else f' — rebook, then cancel {b["booking_no"]}')
+                ref = b["booking_no"]
+                cancel = ("" if public or ref in ("—", "") else
+                          f' — rebook, then cancel '
+                          f'{mask_ref(ref) if cloud else ref}')
                 summary_drops.append(
                     f'<a class="ci cidrop" href="#{anchor}">{b["name"]}: '
                     f'{fmt_inr(-diff)} below your booked price '
                     f'(now {fmt_inr(inr_m)}){cancel}</a>')
-            pv0 = ap(prev.get(cmp_key) or prev.get("inr_member"))
+            pv0 = apk(prev, cmp_key if cmp_key in prev else "inr_member")
             if pv0:
                 pd0 = inr_m - pv0
                 if pd0 < -threshold:
@@ -385,36 +479,48 @@ def render_page(config, history, fx, interactive=False, public=False,
                 eur_m = eur_m or cur.get("member_amount")
                 eur_bb = eur_bb or cur.get("bb_member_amount")
             tax_pct = float(b.get("city_tax_pct") or 0)
-            flex_box = price_box("Flexible", ap(cur["inr_member"]),
+
+            def shrink(raw, key):
+                """Scale a native-currency amount the same way its INR
+                twin was scaled, so EUR and points stay consistent."""
+                base = cur.get(key)
+                adj = apk(cur, key)
+                return raw * adj / base if raw and base and adj else raw
+
+            flex_box = price_box("Flexible", apk(cur, "inr_member"),
                                  cur.get("inr_standard"),
                                  cur.get("member_amount"), currency,
-                                 ap(eur_m), fx, tax_pct=tax_pct,
-                                 prev_val=ap(prev.get("inr_member")))
+                                 shrink(eur_m, "inr_member"), fx,
+                                 tax_pct=tax_pct, note=plus_note(cur, b),
+                                 prev_val=apk(prev, "inr_member"))
             bb_box = price_box("Flexible + breakfast",
-                               ap(cur.get("inr_bb_member")),
+                               apk(cur, "inr_bb_member"),
                                cur.get("inr_bb_standard"),
                                cur.get("bb_member_amount"), currency,
-                               ap(eur_bb), fx, empty="not offered",
-                               tax_pct=tax_pct,
-                               prev_val=ap(prev.get("inr_bb_member")))
+                               shrink(eur_bb, "inr_bb_member"), fx,
+                               empty="not offered", tax_pct=tax_pct,
+                               note=plus_note(cur, b, "inr_bb_member"),
+                               prev_val=apk(prev, "inr_bb_member"))
             eur_nf = cur.get("eur_nf_member")
             eur_nf_bb = cur.get("eur_nf_bb_member")
             if currency == "EUR":
                 eur_nf = eur_nf or cur.get("nf_member_amount")
                 eur_nf_bb = eur_nf_bb or cur.get("nf_bb_member_amount")
-            nf_box = price_box("Non-flexible", ap(cur.get("inr_nf_member")),
+            nf_box = price_box("Non-flexible", apk(cur, "inr_nf_member"),
                                cur.get("inr_nf_standard"),
                                cur.get("nf_member_amount"), currency,
-                               ap(eur_nf), fx, empty="not offered",
-                               tax_pct=tax_pct,
-                               prev_val=ap(prev.get("inr_nf_member")))
+                               shrink(eur_nf, "inr_nf_member"), fx,
+                               empty="not offered", tax_pct=tax_pct,
+                               note=plus_note(cur, b, "inr_nf_member"),
+                               prev_val=apk(prev, "inr_nf_member"))
             nf_bb_box = price_box("Non-flex + breakfast",
-                                  ap(cur.get("inr_nf_bb_member")),
+                                  apk(cur, "inr_nf_bb_member"),
                                   cur.get("inr_nf_bb_standard"),
                                   cur.get("nf_bb_member_amount"), currency,
-                                  ap(eur_nf_bb), fx, empty="not offered",
-                                  tax_pct=tax_pct,
-                                  prev_val=ap(prev.get("inr_nf_bb_member")))
+                                  shrink(eur_nf_bb, "inr_nf_bb_member"), fx,
+                                  empty="not offered", tax_pct=tax_pct,
+                                  note=plus_note(cur, b, "inr_nf_bb_member"),
+                                  prev_val=apk(prev, "inr_nf_bb_member"))
             room_name = cur.get("room_name", cur.get("room", ""))
 
             # recommendation score (0–100): affordability, location,
@@ -432,9 +538,9 @@ def render_page(config, history, fx, interactive=False, public=False,
                 pen = min(dist_km * 4, 25)
                 score -= pen
                 parts.append(f"{dist_km:.1f} km from centre: −{pen:.0f}")
-            bb_now = ap(cur.get("inr_bb_member"))
+            bb_now = apk(cur, "inr_bb_member")
             if bb_now and cur.get("inr_member"):
-                prem = (bb_now - ap(cur["inr_member"])) / max(b["nights"], 1)
+                prem = (bb_now - apk(cur, "inr_member")) / max(b["nights"], 1)
                 if prem < 1200:
                     score += 6
                     parts.append(f"cheap breakfast (+₹{prem:,.0f}/night): +6")
@@ -556,6 +662,12 @@ def render_page(config, history, fx, interactive=False, public=False,
                          {"checked" if b.get("points_at_hotel") else ""}
                          style="width:auto"> Hotel accepts points at the
                   desk</label>
+                <label style="grid-auto-flow:column; justify-content:start;
+                              align-items:center; gap:.4rem">
+                  <input type="checkbox" name="accor_plus"
+                         {"" if b.get("accor_plus") is False else "checked"}
+                         style="width:auto"> Accor+ Explorer rate here
+                  (public −{plus_pct:g}%)</label>
                 <button type="submit" class="primary">Save</button>
               </form></details>"""
         booking_line = ("booked" if public else
@@ -574,7 +686,7 @@ def render_page(config, history, fx, interactive=False, public=False,
   data-diff="{diff if diff is not None and b["booked_inr"] else 9e12:.0f}">
   <div class="chead">
     <div class="cinfo">
-      <div class="hname">{'<span class="pinmark">◆</span> ' if pinned else ''}{b["name"]}{status_tag}{f'<span class="stag apptag">{app_pct:g}% app rate</span>' if app_pct else ""}</div>
+      <div class="hname">{'<span class="pinmark">◆</span> ' if pinned else ''}{b["name"]}{status_tag}{f'<span class="stag plustag" title="you are not shown the subscriber rate logged out — this is the public rate less {plus_pct:g}%">Accor+ est.</span>' if plus_seen[0] else ""}{f'<span class="stag apptag">{app_pct:g}% app rate</span>' if app_pct else ""}</div>
       <div class="hmeta">{city_part}{fmt_dates(b["dateIn"], b["nights"])} ·
         {b["nights"]} night(s) · {booking_line}{f' · {dist_km:.1f} km from centre' if dist_km is not None else ''}</div>
       {room_part}
@@ -904,6 +1016,8 @@ a:hover {{ text-decoration:underline; }}
 .stag.hotelpts {{ color:var(--accent); border-style:dashed;
   border-color:color-mix(in srgb, var(--accent) 45%, var(--line)); }}
 .stag.cash {{ color:var(--muted); }}
+.stag.plustag {{ color:var(--drop); border-style:dashed;
+  border-color:color-mix(in srgb, var(--drop) 40%, var(--line)); }}
 .cov {{ margin-top:.6rem; padding-top:.5rem; font-size:.88rem;
   border-top:1px solid var(--line); }}
 .cov.ok {{ color:var(--drop); }}

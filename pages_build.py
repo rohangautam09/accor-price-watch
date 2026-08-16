@@ -22,7 +22,8 @@ from playwright.async_api import async_playwright
 import check
 from check import (CONFIG, UA, capture_templates, extract_room_names,
                    fast_fetch, get_fx_rates, offers_to_result, uid_of)
-from render import fmt_inr, max_points_for, render_page
+from render import (PAIR, PLUS_PCT, accor_plus_price, fmt_inr,
+                    max_points_for, render_page)
 
 BASE = pathlib.Path(__file__).parent
 HIST = BASE / "history_public.json"
@@ -102,17 +103,25 @@ async def fetch_all():
 
 
 def find_drops(results, fx):
-    """Same comparison the dashboard shows: app discount applied, breakfast
-    matched, booked amount fixed in EUR."""
+    """Same comparison the dashboard shows: Accor+ subscriber rate estimated
+    from the public rate, app discount applied, breakfast matched, booked
+    amount fixed in EUR."""
     by_uid = {r.get("uid", r["code"]): r for r in results}
     drops, fingerprint = [], []
     for b in CONFIG["bookings"]:
         r = by_uid.get(uid_of(b), {})
-        now = (r.get("inr_bb_member") if b.get("breakfast")
-               else None) or r.get("inr_member")
+        key = ("inr_bb_member" if b.get("breakfast")
+               and r.get("inr_bb_member") else "inr_member")
+        now = r.get(key)
         booked = booked_now(b, fx)
         if now is None or not booked:
             continue
+        ratio = 1.0
+        if b.get("accor_plus", True) is not False:
+            p = accor_plus_price(now, r.get(PAIR[key]),
+                                 float(b.get("accor_plus_pct") or PLUS_PCT))
+            if p and p < now:
+                ratio, now = p / now, p
         now *= 1 - float(b.get("app_discount_pct") or 0) / 100
         saved = booked - now
         if saved <= CONFIG["drop_threshold_inr"]:
@@ -120,8 +129,8 @@ def find_drops(results, fx):
         d1 = dt.date.fromisoformat(b["dateIn"])
         d2 = d1 + dt.timedelta(days=int(b["nights"]))
         pts = max_points_for(
-            (r.get("eur_bb_member") if b.get("breakfast") else None)
-            or r.get("eur_member") or 0, b.get("city_tax_pct"))
+            ((r.get("eur_bb_member") if key == "inr_bb_member" else None)
+             or r.get("eur_member") or 0) * ratio, b.get("city_tax_pct"))
         drops.append(
             f'### {b["name"]}\n'
             f'{d1:%d %b} → {d2:%d %b %Y} · {b["nights"]} night(s)\n\n'

@@ -20,7 +20,8 @@ import urllib.request
 
 from playwright.async_api import async_playwright
 
-from render import BOOKING_URL, fmt_inr, render_page
+from render import (BOOKING_URL, PAIR, PLUS_PCT, accor_plus_price, fmt_inr,
+                    render_page)
 
 BASE = pathlib.Path(__file__).parent
 CONFIG = json.loads((BASE / "config.json").read_text())
@@ -685,10 +686,18 @@ async def main(only=None):
         r = next((x for x in results
                   if x.get("uid", x["code"]) == uid_of(b)), {})
         # compare like-for-like: breakfast bookings vs flexible+breakfast rate
-        inr = (r.get("inr_bb_member") if b.get("breakfast") else None) \
-            or r.get("inr_member")
+        key = ("inr_bb_member" if b.get("breakfast")
+               and r.get("inr_bb_member") else "inr_member")
+        inr = r.get(key)
         if inr is not None:
-            # apply the manually-noted app discount, same as the dashboard
+            # the subscriber rate is invisible logged out, so estimate it
+            # from the public rate, then the manually-noted app discount
+            if b.get("accor_plus", True) is not False:
+                p = accor_plus_price(inr, r.get(PAIR[key]),
+                                     float(b.get("accor_plus_pct")
+                                           or PLUS_PCT))
+                if p and p < inr:
+                    inr = p
             inr *= 1 - float(b.get("app_discount_pct") or 0) / 100
         booked = eff_booked(b, fx)
         if inr is not None and booked - inr > CONFIG["drop_threshold_inr"]:
