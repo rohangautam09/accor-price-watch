@@ -233,7 +233,7 @@ def render_page(config, history, fx, interactive=False, public=False,
     else:
         total_widget = f"<strong>{total_pts:,}</strong>"
     # what you will actually pay, and whether points could cover more
-    need_pts = cash_left_eur = flat_tax_eur = 0
+    need_pts = cash_left_eur = 0
     due_eur = pts_on_bookings = 0        # actual, given points already applied
     cash_group = {"eur": 0.0, "n": 0}    # paid entirely at the hotel
     pts_group = {"eur": 0.0, "n": 0}     # part points, rest at the hotel
@@ -245,10 +245,10 @@ def render_page(config, history, fx, interactive=False, public=False,
         used = int(b.get("points_used", 0))
         cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
         need_pts += max(cap - used, 0)
-        cash_left_eur += b["booked_eur"] - cap * 0.02
         flat = (float(b.get("city_tax_flat_eur") or 0)
                 * config["adults"] * int(b["nights"]))
-        flat_tax_eur += flat
+        # same basis as due_eur below, so the two totals are comparable
+        cash_left_eur += max(b["booked_eur"] - cap * 0.02, 0) + flat
         pts_on_bookings += used
         stay_due = max(b["booked_eur"] - used * 0.02, 0) + flat
         due_eur += stay_due
@@ -258,31 +258,44 @@ def render_page(config, history, fx, interactive=False, public=False,
         else:
             cash_group["eur"] += stay_due
             cash_group["n"] += 1
-    flat_note = (f'<br><small>Plus <strong>€{flat_tax_eur:,.2f}'
-                 f'{f" ≈ {fmt_inr(flat_tax_eur * fx)}" if fx else ""}</strong>'
-                 f' of flat city tax (Belgium) collected at the hotel — not '
-                 f'in the Accor total, never payable with points.</small>'
-                 if flat_tax_eur else "")
     gap = need_pts - remaining_pts
+
+    def covrow(label, pts=None, eur=None, strong=False):
+        if pts is not None:
+            left, right = f"{pts:,} pts", fmt_inr(pts_inr(pts, fx)) if fx \
+                else f"€{pts * 0.02:,.2f}"
+        else:
+            left = f"€{eur:,.2f}"
+            right = fmt_inr(eur * fx) if fx else ""
+        val = f"<b>{right}</b>" if strong else right
+        return (f'<div class="covrow"><span>{label}</span>'
+                f'<span class="covpts">{left}</span><span>{val}</span></div>')
+
     if not booked_n:
         coverage = ""
-    elif gap <= 0:
-        coverage = (f'<div class="cov ok">Your points cover every booked '
-                    f'stay — {need_pts:,} pts needed, {remaining_pts:,} '
-                    f'available ({abs(gap):,} to spare). Cash still due at '
-                    f'the hotels (taxes + sub-€40 remainders): '
-                    f'<strong>€{cash_left_eur:,.2f}'
-                    f'{f" ≈ {fmt_inr(cash_left_eur * fx)}" if fx else ""}'
-                    f'</strong>{flat_note}</div>')
     else:
-        coverage = (f'<div class="cov short">Short by <strong>{gap:,} pts'
-                    f'</strong>{worth_txt(gap)} to fully cover your '
-                    f'{booked_n} booked stay(s) — {need_pts:,} pts needed, '
-                    f'{remaining_pts:,} available. Cash still due regardless '
-                    f'(taxes + sub-€40 remainders): '
-                    f'<strong>€{cash_left_eur:,.2f}'
-                    f'{f" ≈ {fmt_inr(cash_left_eur * fx)}" if fx else ""}'
-                    f'</strong>{flat_note}</div>')
+        head = ("Your points cover every booked stay" if gap <= 0 else
+                f"Short of covering all {booked_n} booked stay(s)")
+        rows = covrow("points needed, on top of the "
+                      f"{pts_on_bookings:,} already applied", need_pts)
+        if gap <= 0:
+            rows += covrow("points left over afterwards",
+                           remaining_pts - need_pts, strong=True)
+        else:
+            rows += covrow("you have", remaining_pts)
+            rows += covrow("still short by", gap, strong=True)
+        rows += covrow("cash at the hotels would then be",
+                       eur=cash_left_eur, strong=True)
+        cut = fmt_inr((due_eur - cash_left_eur) * fx) if fx else \
+            f"€{due_eur - cash_left_eur:,.2f}"
+        rows += (f'<div class="covfoot">that is {cut} less than the '
+                 f'{fmt_inr(due_eur * fx) if fx else f"€{due_eur:,.2f}"} '
+                 f'you owe today, because more of each stay would be paid '
+                 f'in points instead of cash.</div>')
+        coverage = (f'<div class="cov {"ok" if gap <= 0 else "short"}">'
+                    f'<div class="covhead">{head}<small> — if you put the '
+                    f'most points Accor allows on all {booked_n} booked '
+                    f'stay(s)</small></div>{rows}</div>')
 
     def money(e):
         return fmt_inr(e * fx) if fx else f"€{e:,.2f}"
@@ -1020,8 +1033,18 @@ a:hover {{ text-decoration:underline; }}
   border-color:color-mix(in srgb, var(--drop) 40%, var(--line)); }}
 .cov {{ margin-top:.6rem; padding-top:.5rem; font-size:.88rem;
   border-top:1px solid var(--line); }}
-.cov.ok {{ color:var(--drop); }}
-.cov.short {{ color:var(--up); }}
+.cov.ok .covhead {{ color:var(--drop); }}
+.cov.short .covhead {{ color:var(--up); }}
+.covhead {{ margin-bottom:.35rem; }}
+.covhead small {{ color:var(--muted); }}
+.covfoot {{ margin-top:.35rem; color:var(--muted); font-size:.84rem; }}
+.covrow {{ display:grid; grid-template-columns:1fr auto auto;
+  gap:.4rem 1.1rem; padding:.18rem 0; color:var(--muted); }}
+.covrow .covpts {{ font-variant-numeric:tabular-nums; color:var(--fg);
+  text-align:right; }}
+.covrow > span:last-child {{ font-variant-numeric:tabular-nums;
+  text-align:right; min-width:5.5em; }}
+.covrow b {{ color:var(--fg); }}
 details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
 
