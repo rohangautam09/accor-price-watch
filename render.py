@@ -1002,8 +1002,8 @@ async function removeHotel(code,dateIn,nights,name){
     --drop:#4ec07f; --up:#e0776a; }} }}
 * {{ box-sizing:border-box; }}
 body {{ font:15px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
-  background:var(--bg); color:var(--fg); max-width:1360px;
-  margin:0 auto; padding:2rem 1.4rem 4rem; letter-spacing:0;
+  background:var(--bg); color:var(--fg);
+  margin:0; padding:2rem 1.6rem 4rem; letter-spacing:0;
   font-optical-sizing:auto; -webkit-font-smoothing:antialiased; }}
 /* larger type reads too loose: tighten tracking and leading as size grows */
 h1 {{ font-size:1.6rem; margin:0 0 .15rem; letter-spacing:-.021em;
@@ -1064,7 +1064,7 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .trend {{ margin-top:.25rem; opacity:.55; }}
 .cright {{ gap:.1rem; }}
 .prices {{ display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));
+  grid-template-columns:repeat(5, minmax(0, 1fr));
   gap:.55rem; margin:.85rem 0 .15rem; }}
 .pbox {{ background:none; border:1px solid var(--line); border-radius:9px;
   padding:.55rem .75rem .6rem; }}
@@ -1282,8 +1282,16 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
   .pbox {{ border-color:color-mix(in srgb, var(--fg) 45%, transparent); }}
   .searchbar {{ background:var(--bg); backdrop-filter:none; }}
 }}
+@media (max-width: 1180px) {{
+  /* below this the five rates stop being legible side by side */
+  .prices {{ grid-template-columns:repeat(3, minmax(0, 1fr)); }}
+}}
 @media (max-width: 1040px) {{
   .layout {{ grid-template-columns:1fr; gap:.9rem; }}
+  .prices {{ grid-template-columns:repeat(5, minmax(0, 1fr)); }}
+}}
+@media (max-width: 900px) {{
+  .prices {{ grid-template-columns:repeat(3, minmax(0, 1fr)); }}
 }}
 @media (max-width: 760px) {{
   body {{ padding:1.2rem .8rem 3rem; }}
