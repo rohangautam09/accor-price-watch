@@ -162,13 +162,12 @@ table.ledger th, table.ledger td { text-align:left; padding:.35rem .6rem;
 table.ledger th { color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }
 td.savepos { color:var(--drop); font-weight:650; }
-/* summary rail beside the hotels rather than another stack of wide bars —
-   it stays put while the list scrolls, so the balances are always on screen */
+/* summary rail beside the hotels rather than another stack of wide bars.
+   Deliberately not sticky and never its own scroller — one scrollbar for
+   the whole page, nothing in the rail can end up out of reach. */
 .layout { display:grid; grid-template-columns:300px minmax(0, 1fr);
   gap:1.5rem; align-items:start; margin-top:1rem; }
-.side { position:sticky; top:1rem; display:flex; flex-direction:column;
-  gap:.7rem; max-height:calc(100vh - 2rem); overflow-y:auto;
-  scrollbar-width:thin; }
+.side { display:flex; flex-direction:column; gap:.7rem; }
 .side > * { margin:0 !important; flex:none; }
 .maincol { min-width:0; }
 .ptshero { padding-bottom:.55rem; margin-bottom:.4rem;
@@ -291,7 +290,6 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 }
 @media (max-width: 1040px) {
   .layout { grid-template-columns:1fr; gap:.9rem; }
-  .side { position:static; max-height:none; overflow:visible; }
 }
 @media (max-width: 760px) {
   body { padding:1.2rem .8rem 3rem; }
