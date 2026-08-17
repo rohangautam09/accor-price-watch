@@ -154,6 +154,9 @@ details select { padding:.45rem .55rem; border:1px solid var(--line);
 .savingsbar { margin:.5rem 0; padding:.9rem 1.1rem; border-radius:12px;
   background:var(--card); border:1px solid var(--line); }
 .savingsbar > span { margin-right:1.4rem; }
+/* the ledger's rows are nowrap, so pen it in rather than let it push the
+   card wider than its column */
+.savingsbar details { max-width:100%; overflow-x:auto; }
 .savingsbar summary { color:var(--drop); }
 table.ledger { border-collapse:collapse; width:100%; margin-top:.7rem;
   font-size:.86rem; }
@@ -343,18 +346,6 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
   <div class="bline duerow"><span>pay in full at the hotel · 1 stay(s)</span><span><b>₹115,146</b></span></div><div class="bline duerow"><span>points + cash · 4 stay(s)<br><small>26,000 pts applied — worth ₹57,573</small></span><span><b>₹15,186</b></span></div>
   <small>across 5 booked stay(s)</small>
 </div>
-
-<div class="savingsbar">
-  <span>Saved by rebooking: <strong>€120.99</strong>
-    ≈ <strong>₹13,396</strong></span>
-  <span><small>10 successful rebooking(s) ·
-    12 tracked</small></span>
-  <details><summary>every rebooking</summary>
-    <table class="ledger"><thead><tr><th>Date</th><th>Hotel</th>
-    <th>Booking</th><th>Price</th><th>Saved</th></tr></thead>
-    <tbody><tr><td>17 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QP••••RH → QP••••RV</small></td><td>€176.60 → €171.50</td><td class="savepos">−€5.10 (₹565)</td></tr><tr><td>17 Aug</td><td>ibis Antwerpen Centrum</td><td><small>QN••••LP → QP••••NG</small></td><td>€105.26 → €99.81</td><td class="savepos">−€5.45 (₹603)</td></tr><tr><td>15 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••SZ → QP••••RH</small></td><td>€188.26 → €176.05</td><td class="savepos">−€12.21 (₹1,352)</td></tr><tr><td>15 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QN••••XS → QP••••VN</small></td><td>€852.57 → €763.69</td><td class="savepos">−€88.88 (₹9,841)</td></tr><tr><td>04 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QH••••SS → QN••••XS</small></td><td>€784.34 → €854.65</td><td class="">€70.31 (₹-7,785)</td></tr><tr><td>03 Aug</td><td>Swissôtel Amsterdam</td><td><small>QN••••SJ → QN••••SM</small></td><td>€1,061.07 → €1,045.97</td><td class="savepos">−€15.10 (₹1,672)</td></tr><tr><td>03 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••ZB → QN••••SZ</small></td><td>€196.87 → €188.26</td><td class="savepos">−€8.61 (₹953)</td></tr><tr><td>28 Jul</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••VC → QN••••ZB</small></td><td>€199.47 → €196.87</td><td class="savepos">−€2.60 (₹288)</td></tr><tr><td>28 Jul</td><td>Swissôtel Amsterdam</td><td><small>QN••••WG → QN••••SJ</small></td><td>€1,069.93 → €1,061.07</td><td class="savepos">−€8.86 (₹981)</td></tr><tr><td>26 Jul</td><td>ibis Antwerpen Centrum</td><td><small>QN••••BB → QN••••LP</small></td><td>€105.25 → €105.25</td><td class="">€0.00</td></tr><tr><td>25 Jul</td><td>Swissôtel Amsterdam</td><td><small>QM••••FN → QN••••WG</small></td><td>€1,090.59 → €1,069.93</td><td class="savepos">−€20.66 (₹2,287)</td></tr><tr><td>15 Jul</td><td>ibis Amsterdam Centre Stopera</td><td><small>QM••••ZB → QM••••QJ</small></td><td>€1,028.72 → €1,004.89</td><td class="savepos">−€23.83 (₹2,638)</td></tr></tbody></table>
-  </details>
-</div>
 <div class="ratebar"><div class="rate"><b>₹110.7175</b><span>per €1</span></div><div class="rate"><b>₹2.21</b><span>per ALL point</span></div><div class="rcap">2,000 pts = €40 ≈ ₹4,429 · Accor's own conversion rate, so every ₹ here matches their pages · refreshed on every price check</div></div>
 <p class="intro">on a drop, book the new rate before cancelling the old
 one.</p>
@@ -385,6 +376,18 @@ one.</p>
     <a href="https://github.com/rohangautam09/accor-price-watch/actions/workflows/pages-check.yml"
        target="_blank">run the check on GitHub instead</a>.</small></p>
   </div>
+</div>
+
+<div class="savingsbar">
+  <span>Saved by rebooking: <strong>€120.99</strong>
+    ≈ <strong>₹13,396</strong></span>
+  <span><small>10 successful rebooking(s) ·
+    12 tracked</small></span>
+  <details><summary>every rebooking</summary>
+    <table class="ledger"><thead><tr><th>Date</th><th>Hotel</th>
+    <th>Booking</th><th>Price</th><th>Saved</th></tr></thead>
+    <tbody><tr><td>17 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QP••••RH → QP••••RV</small></td><td>€176.60 → €171.50</td><td class="savepos">−€5.10 (₹565)</td></tr><tr><td>17 Aug</td><td>ibis Antwerpen Centrum</td><td><small>QN••••LP → QP••••NG</small></td><td>€105.26 → €99.81</td><td class="savepos">−€5.45 (₹603)</td></tr><tr><td>15 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••SZ → QP••••RH</small></td><td>€188.26 → €176.05</td><td class="savepos">−€12.21 (₹1,352)</td></tr><tr><td>15 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QN••••XS → QP••••VN</small></td><td>€852.57 → €763.69</td><td class="savepos">−€88.88 (₹9,841)</td></tr><tr><td>04 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QH••••SS → QN••••XS</small></td><td>€784.34 → €854.65</td><td class="">€70.31 (₹-7,785)</td></tr><tr><td>03 Aug</td><td>Swissôtel Amsterdam</td><td><small>QN••••SJ → QN••••SM</small></td><td>€1,061.07 → €1,045.97</td><td class="savepos">−€15.10 (₹1,672)</td></tr><tr><td>03 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••ZB → QN••••SZ</small></td><td>€196.87 → €188.26</td><td class="savepos">−€8.61 (₹953)</td></tr><tr><td>28 Jul</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••VC → QN••••ZB</small></td><td>€199.47 → €196.87</td><td class="savepos">−€2.60 (₹288)</td></tr><tr><td>28 Jul</td><td>Swissôtel Amsterdam</td><td><small>QN••••WG → QN••••SJ</small></td><td>€1,069.93 → €1,061.07</td><td class="savepos">−€8.86 (₹981)</td></tr><tr><td>26 Jul</td><td>ibis Antwerpen Centrum</td><td><small>QN••••BB → QN••••LP</small></td><td>€105.25 → €105.25</td><td class="">€0.00</td></tr><tr><td>25 Jul</td><td>Swissôtel Amsterdam</td><td><small>QM••••FN → QN••••WG</small></td><td>€1,090.59 → €1,069.93</td><td class="savepos">−€20.66 (₹2,287)</td></tr><tr><td>15 Jul</td><td>ibis Amsterdam Centre Stopera</td><td><small>QM••••ZB → QM••••QJ</small></td><td>€1,028.72 → €1,004.89</td><td class="savepos">−€23.83 (₹2,638)</td></tr></tbody></table>
+  </details>
 </div>
 <div class="searchbar">
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"

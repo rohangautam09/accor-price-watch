@@ -1145,6 +1145,9 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .savingsbar {{ margin:.5rem 0; padding:.9rem 1.1rem; border-radius:12px;
   background:var(--card); border:1px solid var(--line); }}
 .savingsbar > span {{ margin-right:1.4rem; }}
+/* the ledger's rows are nowrap, so pen it in rather than let it push the
+   card wider than its column */
+.savingsbar details {{ max-width:100%; overflow-x:auto; }}
 .savingsbar summary {{ color:var(--drop); }}
 table.ledger {{ border-collapse:collapse; width:100%; margin-top:.7rem;
   font-size:.86rem; }}
@@ -1317,13 +1320,13 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 {changebar}
 {points_bar}
 {due_bar}
-{savings_bar}
 {rate_bar}
 <p class="intro">on a drop, book the new rate before cancelling the old
 one.</p>
 </aside>
 <main class="maincol">
 {controls}
+{savings_bar}
 <div class="searchbar">
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"
          oninput="filterRows(this.value)">
