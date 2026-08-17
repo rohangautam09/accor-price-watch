@@ -108,5 +108,15 @@
   "old_eur": 105.26,
   "new_eur": 99.81,
   "saved_eur": 5.45
+ },
+ {
+  "date": "2026-08-17",
+  "name": "ibis budget Brugge Centrum Station",
+  "uid": "5046:2026-09-21:2",
+  "from": "QPJPFRRH",
+  "to": "QPMPBSRV",
+  "old_eur": 176.6,
+  "new_eur": 171.5,
+  "saved_eur": 5.1
  }
 ]
