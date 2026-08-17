@@ -53,15 +53,18 @@ a:hover { text-decoration:underline; }
   border-top:1px solid var(--line); }
 .cov.ok .covhead { color:var(--drop); }
 .cov.short .covhead { color:var(--up); }
-.covhead { margin-bottom:.35rem; }
-.covhead small { color:var(--muted); }
-.covrow { display:grid; grid-template-columns:1fr auto auto;
-  gap:.4rem 1.1rem; padding:.18rem 0; color:var(--muted); }
-.covrow .covpts { font-variant-numeric:tabular-nums; color:var(--fg);
-  text-align:right; }
-.covrow > span:last-child { font-variant-numeric:tabular-nums;
-  text-align:right; min-width:5.5em; }
-.covrow b { color:var(--fg); }
+.covhead { margin-bottom:.4rem; }
+.covhead small { display:block; color:var(--muted); font-size:.8rem; }
+/* label above, figures below — survives the narrow rail without wrapping
+   mid-number the way a three-column row does */
+.covrow { padding:.3rem 0; }
+.covrow + .covrow { border-top:1px solid var(--line); }
+.covlab { display:block; color:var(--muted); font-size:.82rem; }
+.covval { display:flex; justify-content:space-between; align-items:baseline;
+  gap:.8rem; font-variant-numeric:tabular-nums; }
+.covval b { font-weight:550; }
+.covval em { font-style:normal; color:var(--muted); }
+.covrow.strong .covval em { color:var(--fg); font-weight:550; }
 details select { padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
 
@@ -70,7 +73,7 @@ details select { padding:.45rem .55rem; border:1px solid var(--line);
 .trend { margin-top:.25rem; opacity:.55; }
 .cright { gap:.1rem; }
 .prices { display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
+  grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));
   gap:.55rem; margin:.85rem 0 .15rem; }
 .pbox { background:none; border:1px solid var(--line); border-radius:9px;
   padding:.55rem .75rem .6rem; }
@@ -159,6 +162,39 @@ table.ledger th, table.ledger td { text-align:left; padding:.35rem .6rem;
 table.ledger th { color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }
 td.savepos { color:var(--drop); font-weight:650; }
+/* summary rail beside the hotels rather than another stack of wide bars —
+   it stays put while the list scrolls, so the balances are always on screen */
+.layout { display:grid; grid-template-columns:300px minmax(0, 1fr);
+  gap:1.5rem; align-items:start; margin-top:1rem; }
+.side { position:sticky; top:1rem; display:flex; flex-direction:column;
+  gap:.7rem; max-height:calc(100vh - 2rem); overflow-y:auto;
+  scrollbar-width:thin; }
+.side > * { margin:0 !important; flex:none; }
+.maincol { min-width:0; }
+.ptshero { padding-bottom:.55rem; margin-bottom:.4rem;
+  border-bottom:1px solid var(--line); }
+.ptslabel { font-size:.72rem; font-weight:500; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--muted); }
+.ptsbig { font-size:2.1rem; font-weight:650; letter-spacing:-.02em;
+  line-height:1.15; font-variant-numeric:tabular-nums; }
+.ptsworth { color:var(--muted); font-size:.9rem; }
+.ptsact { margin-top:.7rem; padding-top:.7rem;
+  border-top:1px solid var(--line); display:flex; flex-direction:column;
+  gap:.5rem; }
+.ptsadd > span:first-child { display:block; font-size:.82rem;
+  color:var(--muted); margin-bottom:.3rem; }
+.inrow { display:flex; gap:.4rem; }
+.inrow input { flex:1; min-width:0; padding:.45rem .6rem;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg);
+  color:var(--fg); font-size:.95rem; font-variant-numeric:tabular-nums; }
+.inrow button { flex:none; padding:0 .9rem; height:2.1rem;
+  border-radius:8px; border:1px solid var(--line); background:none;
+  color:var(--fg); font-size:.88rem; cursor:pointer; }
+.inrow button.primary { background:var(--fg); color:var(--bg);
+  border-color:var(--fg); font-weight:550; }
+.ptsact details summary { font-size:.82rem; color:var(--muted);
+  cursor:pointer; }
+.ptsact details[open] summary { margin-bottom:.35rem; }
 .ratebar { margin:.9rem 0; padding:.85rem 1.1rem; background:var(--card);
   border:1px solid var(--line); border-radius:12px; display:flex;
   flex-wrap:wrap; align-items:baseline; gap:.3rem 2.4rem; }
@@ -253,6 +289,10 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
   .pbox { border-color:color-mix(in srgb, var(--fg) 45%, transparent); }
   .searchbar { background:var(--bg); backdrop-filter:none; }
 }
+@media (max-width: 1040px) {
+  .layout { grid-template-columns:1fr; gap:.9rem; }
+  .side { position:static; max-height:none; overflow:visible; }
+}
 @media (max-width: 760px) {
   body { padding:1.2rem .8rem 3rem; }
   h1 { font-size:1.35rem; }
@@ -269,8 +309,8 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
   .pval { font-size:1.05rem; }
   .tiny { font-size:.74rem; }
   .insights span { font-size:.75rem; }
-  .pointsbar > span, .savingsbar > span { display:block;
-    margin:0 0 .3rem; white-space:normal; }
+  .savingsbar > span { display:block; margin:0 0 .3rem;
+    white-space:normal; }
   .searchbar { flex-wrap:wrap; }
   .searchbar input { max-width:none; flex:1 1 100%; }
   table.ledger { display:block; overflow-x:auto; }
@@ -283,10 +323,21 @@ details input { padding:.45rem .55rem; border:1px solid var(--line);
 <div class="hmeta">Watching 8 hotel(s) · 2 adults · flexible rates only</div>
 <div class="lastcheck">Last checked: <span id="stamp">2026-08-17 19:58:10 (fetched in 17s)</span></div>
 
+<div class="layout">
+<aside class="side">
 <div class="changebar"><a class="ci cidn" href="#hA599-2026-09-16-3">Swissôtel Amsterdam: ₹534 down since last run</a></div>
-<div class="ratebar"><div class="rate"><b>₹110.7175</b><span>per €1</span></div><div class="rate"><b>₹2.21</b><span>per ALL point</span></div><div class="rcap">2,000 pts = €40 ≈ ₹4,429 · Accor's own conversion rate, so every ₹ here matches their pages · refreshed on every price check</div></div>
-<p class="intro">on a drop, book the new rate before cancelling the old
-one.</p>
+
+<div class="pointsbar">
+  <div class="ptshero">
+    <div class="ptslabel">ALL points available to spend</div>
+    <div class="ptsbig">54,054</div>
+    <div class="ptsworth">₹119,694</div>
+  </div>
+  <div class="covrow"><span class="covlab">earned in total</span><span class="covval"><b>80,054 pts</b><em>₹177,268</em></span></div>
+  <div class="covrow"><span class="covlab">used in bookings</span><span class="covval"><b>26,000 pts</b><em>₹57,573</em></span></div>
+  
+  <div class="cov ok"><div class="covhead">Your points cover every booked stay<small>if you max out points on every booked stay</small></div><div class="covrow"><span class="covlab">still needed, on top of the 26,000 already applied</span><span class="covval"><b>48,000 pts</b><em>₹106,289</em></span></div><div class="covrow strong"><span class="covlab">left over afterwards</span><span class="covval"><b>6,054 pts</b><em>₹13,406</em></span></div></div>
+</div>
 
 <div class="duebar">
   <div class="duehead">Cash still to pay at the hotels
@@ -306,13 +357,11 @@ one.</p>
     <tbody><tr><td>17 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QP••••RH → QP••••RV</small></td><td>€176.60 → €171.50</td><td class="savepos">−€5.10 (₹565)</td></tr><tr><td>17 Aug</td><td>ibis Antwerpen Centrum</td><td><small>QN••••LP → QP••••NG</small></td><td>€105.26 → €99.81</td><td class="savepos">−€5.45 (₹603)</td></tr><tr><td>15 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••SZ → QP••••RH</small></td><td>€188.26 → €176.05</td><td class="savepos">−€12.21 (₹1,352)</td></tr><tr><td>15 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QN••••XS → QP••••VN</small></td><td>€852.57 → €763.69</td><td class="savepos">−€88.88 (₹9,841)</td></tr><tr><td>04 Aug</td><td>Aparthotel Adagio Amsterdam City South</td><td><small>QH••••SS → QN••••XS</small></td><td>€784.34 → €854.65</td><td class="">€70.31 (₹-7,785)</td></tr><tr><td>03 Aug</td><td>Swissôtel Amsterdam</td><td><small>QN••••SJ → QN••••SM</small></td><td>€1,061.07 → €1,045.97</td><td class="savepos">−€15.10 (₹1,672)</td></tr><tr><td>03 Aug</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••ZB → QN••••SZ</small></td><td>€196.87 → €188.26</td><td class="savepos">−€8.61 (₹953)</td></tr><tr><td>28 Jul</td><td>ibis budget Brugge Centrum Station</td><td><small>QN••••VC → QN••••ZB</small></td><td>€199.47 → €196.87</td><td class="savepos">−€2.60 (₹288)</td></tr><tr><td>28 Jul</td><td>Swissôtel Amsterdam</td><td><small>QN••••WG → QN••••SJ</small></td><td>€1,069.93 → €1,061.07</td><td class="savepos">−€8.86 (₹981)</td></tr><tr><td>26 Jul</td><td>ibis Antwerpen Centrum</td><td><small>QN••••BB → QN••••LP</small></td><td>€105.25 → €105.25</td><td class="">€0.00</td></tr><tr><td>25 Jul</td><td>Swissôtel Amsterdam</td><td><small>QM••••FN → QN••••WG</small></td><td>€1,090.59 → €1,069.93</td><td class="savepos">−€20.66 (₹2,287)</td></tr><tr><td>15 Jul</td><td>ibis Amsterdam Centre Stopera</td><td><small>QM••••ZB → QM••••QJ</small></td><td>€1,028.72 → €1,004.89</td><td class="savepos">−€23.83 (₹2,638)</td></tr></tbody></table>
   </details>
 </div>
-
-<div class="pointsbar">
-  <span>ALL points — total: <strong>80,054</strong> <small class="pts">≈ ₹177,268</small></span>
-  <span>used in bookings: <strong>26,000</strong> <small class="pts">≈ ₹57,573</small></span>
-  <span>remaining: <strong>54,054</strong> <small class="pts">≈ ₹119,694</small></span>
-  <div class="cov ok"><div class="covhead">Your points cover every booked stay<small> — if you put the most points Accor allows on all 5 booked stay(s)</small></div><div class="covrow"><span>points needed, on top of the 26,000 already applied</span><span class="covpts">48,000 pts</span><span>₹106,289</span></div><div class="covrow"><span>points left over afterwards</span><span class="covpts">6,054 pts</span><span><b>₹13,406</b></span></div></div>
-</div>
+<div class="ratebar"><div class="rate"><b>₹110.7175</b><span>per €1</span></div><div class="rate"><b>₹2.21</b><span>per ALL point</span></div><div class="rcap">2,000 pts = €40 ≈ ₹4,429 · Accor's own conversion rate, so every ₹ here matches their pages · refreshed on every price check</div></div>
+<p class="intro">on a drop, book the new rate before cancelling the old
+one.</p>
+</aside>
+<main class="maincol">
 
 <div class="controls">
   <button id="checkbtn" class="primary" onclick="cloudRefresh()">refresh prices</button>
@@ -581,6 +630,8 @@ document.addEventListener('DOMContentLoaded',function(){
     
   </div>
 </div></div>
+</main>
+</div>
 
 <script>
 const REPO="rohangautam09/accor-price-watch", WF="pages-check.yml";

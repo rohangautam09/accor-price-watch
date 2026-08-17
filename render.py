@@ -216,22 +216,23 @@ def render_page(config, history, fx, interactive=False, public=False,
     used_pts = sum(int(b.get("points_used", 0)) for b in config["bookings"])
     remaining_pts = total_pts - used_pts
 
-    def worth_txt(pts):
-        v = pts_inr(pts, fx)
-        return (f' <small class="pts">≈ {fmt_inr(v)}</small>'
-                if v is not None else "")
-
     if interactive:
-        total_widget = (f'<input id="total_pts" type="number" min="0" '
-                        f'value="{total_pts}" style="width:7.5em"> '
-                        f'<button class="link" onclick="savePoints()">save'
-                        f'</button> &nbsp;'
-                        f'<input id="add_pts" type="number" '
-                        f'placeholder="earned pts" style="width:6.5em"> '
-                        f'<button class="link" onclick="addPoints()">+ add'
-                        f'</button>')
+        pts_actions = (
+            f'<div class="ptsact">'
+            f'<label class="ptsadd"><span>add points you have earned</span>'
+            f'<span class="inrow">'
+            f'<input id="add_pts" type="number" min="0" placeholder="2,000" '
+            f'onkeydown="if(event.key===\'Enter\')addPoints()">'
+            f'<button class="primary" onclick="addPoints()">add</button>'
+            f'</span></label>'
+            f'<details><summary>correct the total</summary>'
+            f'<span class="inrow">'
+            f'<input id="total_pts" type="number" min="0" '
+            f'value="{total_pts}">'
+            f'<button onclick="savePoints()">save</button>'
+            f'</span></details></div>')
     else:
-        total_widget = f"<strong>{total_pts:,}</strong>"
+        pts_actions = ""
     # what you will actually pay, and whether points could cover more
     need_pts = 0
     due_eur = pts_on_bookings = 0        # actual, given points already applied
@@ -265,27 +266,28 @@ def render_page(config, history, fx, interactive=False, public=False,
         else:
             left = f"€{eur:,.2f}"
             right = fmt_inr(eur * fx) if fx else ""
-        val = f"<b>{right}</b>" if strong else right
-        return (f'<div class="covrow"><span>{label}</span>'
-                f'<span class="covpts">{left}</span><span>{val}</span></div>')
+        return (f'<div class="covrow{" strong" if strong else ""}">'
+                f'<span class="covlab">{label}</span>'
+                f'<span class="covval"><b>{left}</b><em>{right}</em></span>'
+                f'</div>')
 
     if not booked_n:
         coverage = ""
     else:
         head = ("Your points cover every booked stay" if gap <= 0 else
-                f"Short of covering all {booked_n} booked stay(s)")
-        rows = covrow("points needed, on top of the "
-                      f"{pts_on_bookings:,} already applied", need_pts)
+                f"Short of covering all {booked_n} booked stays")
+        rows = covrow(f"still needed, on top of the {pts_on_bookings:,} "
+                      f"already applied", need_pts)
         if gap <= 0:
-            rows += covrow("points left over afterwards",
+            rows += covrow("left over afterwards",
                            remaining_pts - need_pts, strong=True)
         else:
             rows += covrow("you have", remaining_pts)
             rows += covrow("still short by", gap, strong=True)
         coverage = (f'<div class="cov {"ok" if gap <= 0 else "short"}">'
-                    f'<div class="covhead">{head}<small> — if you put the '
-                    f'most points Accor allows on all {booked_n} booked '
-                    f'stay(s)</small></div>{rows}</div>')
+                    f'<div class="covhead">{head}<small>if you max out '
+                    f'points on every booked stay</small></div>'
+                    f'{rows}</div>')
 
     def money(e):
         return fmt_inr(e * fx) if fx else f"€{e:,.2f}"
@@ -312,9 +314,15 @@ def render_page(config, history, fx, interactive=False, public=False,
 
     points_bar = "" if public else f"""
 <div class="pointsbar">
-  <span>ALL points — total: {total_widget}{worth_txt(total_pts)}</span>
-  <span>used in bookings: <strong>{used_pts:,}</strong>{worth_txt(used_pts)}</span>
-  <span>remaining: <strong>{remaining_pts:,}</strong>{worth_txt(remaining_pts)}</span>
+  <div class="ptshero">
+    <div class="ptslabel">ALL points available to spend</div>
+    <div class="ptsbig">{remaining_pts:,}</div>
+    <div class="ptsworth">{fmt_inr(pts_inr(remaining_pts, fx)) if fx
+                           else f"€{remaining_pts * 0.02:,.2f}"}</div>
+  </div>
+  {covrow("earned in total", total_pts)}
+  {covrow("used in bookings", used_pts)}
+  {pts_actions}
   {coverage}
 </div>"""
 
@@ -1036,15 +1044,18 @@ a:hover {{ text-decoration:underline; }}
   border-top:1px solid var(--line); }}
 .cov.ok .covhead {{ color:var(--drop); }}
 .cov.short .covhead {{ color:var(--up); }}
-.covhead {{ margin-bottom:.35rem; }}
-.covhead small {{ color:var(--muted); }}
-.covrow {{ display:grid; grid-template-columns:1fr auto auto;
-  gap:.4rem 1.1rem; padding:.18rem 0; color:var(--muted); }}
-.covrow .covpts {{ font-variant-numeric:tabular-nums; color:var(--fg);
-  text-align:right; }}
-.covrow > span:last-child {{ font-variant-numeric:tabular-nums;
-  text-align:right; min-width:5.5em; }}
-.covrow b {{ color:var(--fg); }}
+.covhead {{ margin-bottom:.4rem; }}
+.covhead small {{ display:block; color:var(--muted); font-size:.8rem; }}
+/* label above, figures below — survives the narrow rail without wrapping
+   mid-number the way a three-column row does */
+.covrow {{ padding:.3rem 0; }}
+.covrow + .covrow {{ border-top:1px solid var(--line); }}
+.covlab {{ display:block; color:var(--muted); font-size:.82rem; }}
+.covval {{ display:flex; justify-content:space-between; align-items:baseline;
+  gap:.8rem; font-variant-numeric:tabular-nums; }}
+.covval b {{ font-weight:550; }}
+.covval em {{ font-style:normal; color:var(--muted); }}
+.covrow.strong .covval em {{ color:var(--fg); font-weight:550; }}
 details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }}
 
@@ -1053,7 +1064,7 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
 .trend {{ margin-top:.25rem; opacity:.55; }}
 .cright {{ gap:.1rem; }}
 .prices {{ display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
+  grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));
   gap:.55rem; margin:.85rem 0 .15rem; }}
 .pbox {{ background:none; border:1px solid var(--line); border-radius:9px;
   padding:.55rem .75rem .6rem; }}
@@ -1142,6 +1153,39 @@ table.ledger th, table.ledger td {{ text-align:left; padding:.35rem .6rem;
 table.ledger th {{ color:var(--muted); font-weight:600; font-size:.78rem;
   text-transform:uppercase; letter-spacing:.05em; }}
 td.savepos {{ color:var(--drop); font-weight:650; }}
+/* summary rail beside the hotels rather than another stack of wide bars —
+   it stays put while the list scrolls, so the balances are always on screen */
+.layout {{ display:grid; grid-template-columns:300px minmax(0, 1fr);
+  gap:1.5rem; align-items:start; margin-top:1rem; }}
+.side {{ position:sticky; top:1rem; display:flex; flex-direction:column;
+  gap:.7rem; max-height:calc(100vh - 2rem); overflow-y:auto;
+  scrollbar-width:thin; }}
+.side > * {{ margin:0 !important; flex:none; }}
+.maincol {{ min-width:0; }}
+.ptshero {{ padding-bottom:.55rem; margin-bottom:.4rem;
+  border-bottom:1px solid var(--line); }}
+.ptslabel {{ font-size:.72rem; font-weight:500; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--muted); }}
+.ptsbig {{ font-size:2.1rem; font-weight:650; letter-spacing:-.02em;
+  line-height:1.15; font-variant-numeric:tabular-nums; }}
+.ptsworth {{ color:var(--muted); font-size:.9rem; }}
+.ptsact {{ margin-top:.7rem; padding-top:.7rem;
+  border-top:1px solid var(--line); display:flex; flex-direction:column;
+  gap:.5rem; }}
+.ptsadd > span:first-child {{ display:block; font-size:.82rem;
+  color:var(--muted); margin-bottom:.3rem; }}
+.inrow {{ display:flex; gap:.4rem; }}
+.inrow input {{ flex:1; min-width:0; padding:.45rem .6rem;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg);
+  color:var(--fg); font-size:.95rem; font-variant-numeric:tabular-nums; }}
+.inrow button {{ flex:none; padding:0 .9rem; height:2.1rem;
+  border-radius:8px; border:1px solid var(--line); background:none;
+  color:var(--fg); font-size:.88rem; cursor:pointer; }}
+.inrow button.primary {{ background:var(--fg); color:var(--bg);
+  border-color:var(--fg); font-weight:550; }}
+.ptsact details summary {{ font-size:.82rem; color:var(--muted);
+  cursor:pointer; }}
+.ptsact details[open] summary {{ margin-bottom:.35rem; }}
 .ratebar {{ margin:.9rem 0; padding:.85rem 1.1rem; background:var(--card);
   border:1px solid var(--line); border-radius:12px; display:flex;
   flex-wrap:wrap; align-items:baseline; gap:.3rem 2.4rem; }}
@@ -1236,6 +1280,10 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
   .pbox {{ border-color:color-mix(in srgb, var(--fg) 45%, transparent); }}
   .searchbar {{ background:var(--bg); backdrop-filter:none; }}
 }}
+@media (max-width: 1040px) {{
+  .layout {{ grid-template-columns:1fr; gap:.9rem; }}
+  .side {{ position:static; max-height:none; overflow:visible; }}
+}}
 @media (max-width: 760px) {{
   body {{ padding:1.2rem .8rem 3rem; }}
   h1 {{ font-size:1.35rem; }}
@@ -1252,8 +1300,8 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
   .pval {{ font-size:1.05rem; }}
   .tiny {{ font-size:.74rem; }}
   .insights span {{ font-size:.75rem; }}
-  .pointsbar > span, .savingsbar > span {{ display:block;
-    margin:0 0 .3rem; white-space:normal; }}
+  .savingsbar > span {{ display:block; margin:0 0 .3rem;
+    white-space:normal; }}
   .searchbar {{ flex-wrap:wrap; }}
   .searchbar input {{ max-width:none; flex:1 1 100%; }}
   table.ledger {{ display:block; overflow-x:auto; }}
@@ -1266,13 +1314,17 @@ details input {{ padding:.45rem .55rem; border:1px solid var(--line);
 <div class="hmeta">{subtitle}</div>
 <div class="lastcheck">Last checked: <span id="stamp">{checked}</span></div>
 {failbar}
+<div class="layout">
+<aside class="side">
 {changebar}
+{points_bar}
+{due_bar}
+{savings_bar}
 {rate_bar}
 <p class="intro">on a drop, book the new rate before cancelling the old
 one.</p>
-{due_bar}
-{savings_bar}
-{points_bar}
+</aside>
+<main class="maincol">
 {controls}
 <div class="searchbar">
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"
@@ -1356,5 +1408,7 @@ document.addEventListener('DOMContentLoaded',function(){{
 }});
 </script>
 <div id="cards">{"".join(body_rows)}</div>
+</main>
+</div>
 {script}
 </body></html>"""
