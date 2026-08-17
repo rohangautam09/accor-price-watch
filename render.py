@@ -720,8 +720,10 @@ def render_page(config, history, fx, interactive=False, public=False,
         changebar = ('<div class="changebar">'
                      + "".join(summary_drops + summary_moves) + "</div>")
     elif latest:
-        changebar = (f'<div class="changebar quiet">nothing moved more '
-                     f'than {fmt_inr(threshold)} since the last run</div>')
+        changebar = (f'<div class="nochange"><span class="dot"></span>'
+                     f'<b>No change</b>'
+                     f'<span>nothing moved more than {fmt_inr(threshold)} '
+                     f'since the last run</span></div>')
     else:
         changebar = ""
     # the two rates every figure on this page is built from — kept big and
@@ -1081,7 +1083,15 @@ details select {{ padding:.45rem .55rem; border:1px solid var(--line);
   color:color-mix(in srgb, var(--up) 85%, var(--fg)); }}
 .changebar {{ display:flex; flex-direction:column; gap:.35rem;
   margin:.4rem 0 .8rem; }}
-.changebar.quiet {{ color:var(--muted); font-size:.86rem; }}
+/* the answer to "did anything move?" — readable at a glance, but calm,
+   because "nothing happened" should never look like an alert */
+.nochange {{ display:flex; align-items:center; flex-wrap:wrap; gap:.25rem .6rem;
+  margin:.4rem 0 .8rem; padding:.75rem 1.05rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); font-size:.98rem; }}
+.nochange b {{ font-weight:600; }}
+.nochange > span:last-child {{ color:var(--muted); font-size:.9rem; }}
+.nochange .dot {{ width:.5rem; height:.5rem; border-radius:50%; flex:none;
+  background:var(--muted); }}
 .ci {{ display:block; padding:.5rem .9rem; border-radius:9px;
   font-size:.92rem; text-decoration:none; border:1px solid var(--line); }}
 .ci:hover {{ text-decoration:none; filter:brightness(1.05); }}
