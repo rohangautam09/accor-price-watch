@@ -681,6 +681,14 @@ async def main(only=None):
     DASHBOARD_FILE.write_text(render_page(CONFIG, history, fx))
     publish_public(history, fx)
 
+    # keep the cloud's copy of what's booked in step with the Mac's, so an
+    # edit made through the local UI can't sit stale in GitHub — see
+    # sync_secret.py for why this exists
+    from sync_secret import sync_now
+    ok, err = sync_now()
+    if not ok:
+        print(f"::warning::could not sync config to GitHub secret: {err}")
+
     drops = []
     for b in bookings:
         r = next((x for x in results

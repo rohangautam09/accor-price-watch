@@ -87,11 +87,16 @@ a:hover { text-decoration:underline; }
 .chead { display:flex; justify-content:space-between; gap:1rem;
   align-items:flex-start; flex-wrap:wrap; }
 .cinfo { min-width:0; flex:1 1 260px; }
-.hname { overflow-wrap:anywhere; }
+/* hotel name + status tags: a flex run so the tags wrap as a group even
+   though the source HTML has no whitespace between adjacent <span>s —
+   plain inline layout would treat that as one unbreakable line and push
+   past the card edge on a phone */
+.hname { overflow-wrap:anywhere; display:flex; flex-wrap:wrap;
+  align-items:center; gap:.3rem .4rem; }
 .hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
 .hmeta { color:var(--muted); font-size:.84rem; margin-top:.1rem; }
-.stag { margin-left:.5rem; padding:.1rem .45rem; border-radius:5px;
-  font-size:.7rem; font-weight:600; vertical-align:2px; white-space:nowrap;
+.stag { padding:.1rem .45rem; border-radius:5px;
+  font-size:.7rem; font-weight:600; white-space:nowrap;
   letter-spacing:.02em; text-transform:lowercase;
   border:1px solid var(--line); color:var(--muted); background:none; }
 .stag.booked { color:var(--drop);
@@ -569,7 +574,8 @@ def mask_ref(ref):
 
 def render_page(config, history, fx, interactive=False, public=False,
                 nav="", stays_html="", stays_js="",
-                cloud=False, repo=None, workflow=None, failure=None):
+                cloud=False, repo=None, workflow=None, failure=None,
+                sync_error=None):
     """public=True renders a shareable copy: no booking numbers,
     no points ledger, no cash-at-hotel figures.
     cloud=True renders the full dashboard for GitHub Pages: booking refs
@@ -1103,6 +1109,11 @@ def render_page(config, history, fx, interactive=False, public=False,
     failbar = (f'<div class="failbar">⚠️ The last automatic check could '
                f'not fetch prices ({failure}). The figures below are from '
                f'the previous successful check.</div>' if failure else "")
+    if sync_error:
+        failbar += (f'<div class="failbar">⚠️ Could not sync your bookings '
+                    f'to GitHub ({sync_error}) — the cloud dashboard and '
+                    f'hourly alerts may be running on an older version of '
+                    f'your bookings until this clears.</div>')
     if summary_drops or summary_moves:
         changebar = ('<div class="changebar">'
                      + "".join(summary_drops + summary_moves) + "</div>")

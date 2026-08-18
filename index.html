@@ -69,11 +69,16 @@ a:hover { text-decoration:underline; }
 .chead { display:flex; justify-content:space-between; gap:1rem;
   align-items:flex-start; flex-wrap:wrap; }
 .cinfo { min-width:0; flex:1 1 260px; }
-.hname { overflow-wrap:anywhere; }
+/* hotel name + status tags: a flex run so the tags wrap as a group even
+   though the source HTML has no whitespace between adjacent <span>s —
+   plain inline layout would treat that as one unbreakable line and push
+   past the card edge on a phone */
+.hname { overflow-wrap:anywhere; display:flex; flex-wrap:wrap;
+  align-items:center; gap:.3rem .4rem; }
 .hname { font-size:1.06rem; font-weight:650; letter-spacing:-.01em; }
 .hmeta { color:var(--muted); font-size:.84rem; margin-top:.1rem; }
-.stag { margin-left:.5rem; padding:.1rem .45rem; border-radius:5px;
-  font-size:.7rem; font-weight:600; vertical-align:2px; white-space:nowrap;
+.stag { padding:.1rem .45rem; border-radius:5px;
+  font-size:.7rem; font-weight:600; white-space:nowrap;
   letter-spacing:.02em; text-transform:lowercase;
   border:1px solid var(--line); color:var(--muted); background:none; }
 .stag.booked { color:var(--drop);
