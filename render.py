@@ -27,6 +27,36 @@ PAGE_CSS = r"""
   border:1px solid var(--line); background:var(--card); }
 .tabs a.on { background:var(--fg); color:var(--bg); border-color:var(--fg); }
 .tabs a:hover { text-decoration:none; }
+/* past stays, folded under the toolbar */
+.staypanel { margin-top:.9rem; }
+.staytotals { display:flex; flex-wrap:wrap; gap:.3rem 1.6rem;
+  padding:.8rem 1.05rem; margin-bottom:.8rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); font-size:.9rem;
+  color:var(--muted); }
+.staytotals b { color:var(--fg); font-variant-numeric:tabular-nums; }
+details.addstay { margin-bottom:.8rem; }
+/* sub-tabs inside the Accor tab: one pane visible at a time */
+.subtabs { display:flex; gap:.4rem; margin:1.1rem 0 .9rem; flex-wrap:wrap; }
+.subtabs button { height:2.25rem; padding:0 1.05rem; border-radius:9px;
+  border:1px solid var(--line); background:var(--card); color:var(--muted);
+  font-size:.94rem; font-weight:550; cursor:pointer; font-family:inherit; }
+.subtabs button.on { background:var(--fg); color:var(--bg);
+  border-color:var(--fg); }
+.pane { display:none; }
+.pane.on { display:block; }
+/* .controls is display:flex, which would otherwise beat the hidden
+   attribute when a non-dashboard pane is showing */
+.controls[hidden] { display:none; }
+.lifetime { padding:.95rem 1.1rem; margin-bottom:.8rem; border-radius:12px;
+  background:var(--card); border:1px solid var(--line); }
+.lifehead { font-size:.72rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--muted); margin-bottom:.7rem; }
+.lifecols { display:grid; gap:.6rem 2rem;
+  grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); }
+.lifesub { font-size:.86rem; font-weight:550; margin-bottom:.35rem;
+  padding-bottom:.3rem; border-bottom:1px solid var(--line); }
+.rowacts { margin-top:.7rem; display:flex; align-items:center; gap:.9rem;
+  flex-wrap:wrap; font-size:.9rem; }
 :root { --bg:#fbfbfc; --card:#ffffff; --box:#fafafb; --fg:#17181b;
   --muted:#8a8f98; --line:#ebecef; --accent:#2f6df6;
   --drop:#177245; --up:#a5372c; }
@@ -283,7 +313,10 @@ button.link.danger { color:var(--up); }
 #status { color:var(--muted); font-size:.88rem; min-height:1.2em;
   display:block; }
 details summary { cursor:pointer; color:var(--accent); }
-details form { display:grid; gap:.6rem; max-width:460px; margin-top:.8rem;
+/* the add-a-hotel form moved out of a <details> into its own pane, so the
+   same styling has to reach both */
+details form, .pane > form { display:grid; gap:.6rem; max-width:460px;
+  margin-top:.8rem;
   padding:1rem 1.1rem; border:1px solid var(--line); border-radius:12px;
   background:var(--card); transform-origin:top left; }
 details[open] > form, details[open] > .setupbox, details[open] > table {
@@ -291,9 +324,12 @@ details[open] > form, details[open] > .setupbox, details[open] > table {
 @keyframes materialize {
   from { opacity:0; transform:scale(.97) translateY(-4px); filter:blur(3px); }
   to { opacity:1; transform:none; filter:none; } }
-details label { display:grid; gap:.18rem; font-size:.88em; }
-details input { padding:.45rem .55rem; border:1px solid var(--line);
-  border-radius:7px; background:var(--bg); color:var(--fg); font-size:1em; }
+details label, .pane > form label { display:grid; gap:.18rem;
+  font-size:.88em; }
+details input, .pane > form input { padding:.45rem .55rem;
+  border:1px solid var(--line); border-radius:7px; background:var(--bg);
+  color:var(--fg); font-size:1em; }
+.pane > form { animation:materialize .28s cubic-bezier(.32,.72,0,1); }
 .intro { color:var(--muted); font-size:.86rem; max-width:70ch; }
 .setupbox { margin-top:.8rem; padding:1rem 1.1rem; border-radius:12px;
   background:var(--card); border:1px solid var(--line); max-width:560px;
@@ -532,7 +568,7 @@ def mask_ref(ref):
 
 
 def render_page(config, history, fx, interactive=False, public=False,
-                nav="",
+                nav="", stays_html="", stays_js="",
                 cloud=False, repo=None, workflow=None, failure=None):
     """public=True renders a shareable copy: no booking numbers,
     no points ledger, no cash-at-hotel figures.
@@ -969,7 +1005,13 @@ def render_page(config, history, fx, interactive=False, public=False,
                           + f'<button class="link" onclick="'
                           f"togglePin('{b['code']}','{b['dateIn']}',{int(b['nights'])})\">"
                           f'{"unpin" if pinned else "pin"}</button>'
-                          f'<button class="link danger" onclick="'
+                          + (f'<button class="link" title="move this '
+                             f'booking into your past stays" onclick="'
+                             f"markStayed('{b['code']}','{b['dateIn']}',"
+                             f"{int(b['nights'])},'{safe_name}')\">"
+                             f'mark stayed</button>'
+                             if b.get("booked_inr") else "")
+                          + f'<button class="link danger" onclick="'
                           f"removeHotel('{b['code']}','{b['dateIn']}',{int(b['nights'])},"
                           f"'{safe_name}')\">remove</button>")
             edit_box = f"""<details class="rowedit"><summary>edit</summary>
@@ -1168,9 +1210,16 @@ async function cloudRefresh(){{
 </script>"""
     if interactive:
         controls = """
+<div class="subtabs" role="tablist">
+  <button class="on" onclick="showPane(this,'dash')">Dashboard</button>
+  <button onclick="showPane(this,'add')">Add a hotel</button>
+  <button onclick="showPane(this,'stays')">Past stays</button>
+</div>
 <div class="controls">
-  <button id="checkbtn" class="primary" onclick="runCheck()">check prices</button>
-  <details id="addbox"><summary>add a hotel</summary>
+  <button id="checkbtn" class="primary" onclick="runCheck()">refresh prices</button>
+  <span id="status"></span>
+</div>
+<div class="pane" id="pane-add">
     <form onsubmit="return addHotel(event)">
       <label>Hotel page link (from all.accor.com) or hotel code
         <input name="code_or_url" required oninput="prefillFromUrl(this)"
@@ -1184,18 +1233,8 @@ async function cloudRefresh(){{
       <label>Booking number (if booked) <input name="booking_no"></label>
       <button type="submit" class="primary">Add to watch list</button>
     </form>
-  </details>
-  <details><summary>settings</summary>
-    <form onsubmit="return saveSettings(event)">
-      <label>Scan ± days around each check-in for cheaper start dates
-        (0 = off, max 14)
-        <input type="number" name="date_scan_days" min="0" max="14"
-               value="__SCAN_DAYS__" style="max-width:6em"></label>
-      <button type="submit" class="primary">Save</button>
-    </form>
-  </details>
-  <span id="status"></span>
-</div>"""
+</div>
+<div class="pane" id="pane-stays">__STAYS_PANEL__</div>"""
         script = """
 <script>
 function prefillFromUrl(inp){
@@ -1245,17 +1284,23 @@ async function addHotel(ev){
   runCheck();
   return false;
 }
-async function saveSettings(ev){
-  ev.preventDefault();
-  const f=ev.target;
-  const r=await fetch('/api/settings',{method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({date_scan_days:f.date_scan_days.value})});
-  const j=await r.json();
-  if(!r.ok){ alert(j.error||'Could not save'); return false; }
-  location.reload();
-  return false;
+__STAYS_JS__
+function showPane(btn, name){
+  document.querySelectorAll('.subtabs button').forEach(function(b){
+    b.classList.toggle('on', b===btn); });
+  ['dash','add','stays'].forEach(function(n){
+    var el=document.getElementById('pane-'+n);
+    if(el) el.classList.toggle('on', n===name); });
+  document.querySelector('.controls').hidden = (name!=='dash');
+  try{ sessionStorage.setItem('accorPane', name); }catch(e){}
 }
+document.addEventListener('DOMContentLoaded', function(){
+  var want='dash';
+  try{ want=sessionStorage.getItem('accorPane')||'dash'; }catch(e){}
+  var btns=document.querySelectorAll('.subtabs button');
+  var idx={dash:0, add:1, stays:2}[want]||0;
+  if(btns[idx]) showPane(btns[idx], want);
+});
 async function savePoints(){
   const v=document.getElementById('total_pts').value;
   const r=await fetch('/api/points',{method:'POST',
@@ -1315,6 +1360,15 @@ async function floorScan(code,dateIn,nights){
     }catch(e){}
   },1000);
 }
+async function markStayed(code,dateIn,nights,name){
+  if(!confirm('Move "'+name+'" into your past stays? It stops being '
+    +'price-checked and its points and nights join your lifetime totals.'))return;
+  const r=await fetch('/api/hotels/stayed',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({code:code,dateIn:dateIn,nights:nights})});
+  if(!r.ok){ alert((await r.json()).error||'Could not move'); return; }
+  location.reload();
+}
 async function removeHotel(code,dateIn,nights,name){
   if(!confirm('Remove "'+name+'" from the watch list?\\n(This does NOT touch any real booking.)'))return;
   await fetch('/api/hotels/delete',{method:'POST',
@@ -1323,8 +1377,8 @@ async function removeHotel(code,dateIn,nights,name){
   location.reload();
 }
 </script>"""
-        controls = controls.replace(
-            "__SCAN_DAYS__", str(config.get("date_scan_days", 7)))
+        script = script.replace("__STAYS_JS__", stays_js)
+        controls = controls.replace("__STAYS_PANEL__", stays_html)
 
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1346,6 +1400,7 @@ one.</p>
 </aside>
 <main class="maincol">
 {controls}
+<div class="pane on" id="pane-dash">
 {savings_bar}
 <div class="searchbar">
   <input id="hotelsearch" type="search" placeholder="Search hotel, city, booking number…"
@@ -1429,6 +1484,7 @@ document.addEventListener('DOMContentLoaded',function(){{
 }});
 </script>
 <div id="cards">{"".join(body_rows)}</div>
+</div>
 </main>
 </div>
 {script}
