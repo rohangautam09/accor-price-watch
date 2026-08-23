@@ -148,5 +148,15 @@
   "old_eur": 996.25,
   "new_eur": 987.38,
   "saved_eur": 8.87
+ },
+ {
+  "date": "2026-08-23",
+  "name": "Swissôtel Amsterdam",
+  "uid": "A599:2026-09-16:3",
+  "from": "QPSLDLKF",
+  "to": "QPSLFJLD",
+  "old_eur": 987.38,
+  "new_eur": 983.99,
+  "saved_eur": 3.39
  }
 ]
