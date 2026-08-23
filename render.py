@@ -1393,10 +1393,10 @@ async function removeHotel(code,dateIn,nights,name){
 
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accor price watch</title>
+<title>Points Ledger — Accor</title>
 <style>{PAGE_CSS}
 </style></head><body>
-{nav}<h1>Accor price watch</h1>
+{nav}<h1>Points Ledger</h1>
 <div class="hmeta">{subtitle}</div>
 <div class="lastcheck">Last checked: <span id="stamp">{checked}</span></div>
 {failbar}
