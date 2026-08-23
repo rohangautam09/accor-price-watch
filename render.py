@@ -20,6 +20,8 @@ CITY_CENTERS = {
 # shared stylesheet — the Marriott tab renders with the same one so
 # both pages stay a single visual system
 PAGE_CSS = r"""
+.brand { font-size:.92rem; font-weight:650; letter-spacing:-.005em;
+  color:var(--muted); margin:0 0 .75rem; }
 /* brand tabs — Accor and Marriott are separate pages sharing one shell */
 .tabs { display:flex; gap:.4rem; margin:0 0 1.2rem; }
 .tabs a { padding:.5rem 1.1rem; border-radius:10px; text-decoration:none;
@@ -1396,7 +1398,8 @@ async function removeHotel(code,dateIn,nights,name){
 <title>Points Ledger — Accor</title>
 <style>{PAGE_CSS}
 </style></head><body>
-{nav}<h1>Points Ledger</h1>
+<div class="brand">Points Ledger</div>
+{nav}<h1>Accor price watch</h1>
 <div class="hmeta">{subtitle}</div>
 <div class="lastcheck">Last checked: <span id="stamp">{checked}</span></div>
 {failbar}
