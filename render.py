@@ -152,6 +152,9 @@ details select { padding:.45rem .55rem; border:1px solid var(--line);
   background:color-mix(in srgb, var(--accent) 8%, transparent);
   color:color-mix(in srgb, var(--fg) 82%, var(--accent)); }
 .insights b { color:var(--accent); }
+.insights .bfx em { font-style:normal; color:var(--muted); }
+.insights .bfx.none { background:none; color:var(--muted);
+  border:1px dashed var(--line); }
 .cactions { display:flex; flex-wrap:wrap; gap:1.1rem; align-items:baseline;
   margin-top:.65rem; font-size:.86rem; }
 .badge { padding:.15rem .5rem; border-radius:6px; font-size:.82em;
@@ -551,6 +554,23 @@ def price_box(label, inr_m, inr_s, amount=None, currency="", eur=None,
             f'{native}{points_line(eur, fx, tax_pct)}{extra}</div>')
 
 
+def breakfast_chip(label, base, with_bb, nights, adults):
+    """What the breakfast add-on actually costs on this stay. The two
+    figures are the same rate with and without it, so the gap is the
+    price of breakfast — shown per stay and per person per night, which
+    is the number worth comparing against a cafe down the road."""
+    if base is None or with_bb is None:
+        return (f'<span class="bfx none">Breakfast ({label}) '
+                f'<em>not offered</em></span>')
+    d = with_bb - base
+    if d <= 50:                      # same rate either way
+        return (f'<span class="bfx">Breakfast ({label}) '
+                f'<b>included</b></span>')
+    per = d / max(nights, 1) / max(adults, 1)
+    return (f'<span class="bfx">Breakfast ({label}) <b>+{fmt_inr(d)}</b> '
+            f'<em>{fmt_inr(per)} pp / night</em></span>')
+
+
 def pts_inr(pts, fx):
     """INR value of points by Accor's formula: 2,000 pts = EUR 40."""
     if not fx:
@@ -911,6 +931,15 @@ def render_page(config, history, fx, interactive=False, public=False,
                                   note=plus_note(cur, b, "inr_nf_bb_member"),
                                   prev_val=apk(prev, "inr_nf_bb_member"))
             room_name = cur.get("room_name", cur.get("room", ""))
+            bfast_html = (
+                '<div class="insights">'
+                + breakfast_chip("flexible", apk(cur, "inr_member"),
+                                 apk(cur, "inr_bb_member"),
+                                 b["nights"], config["adults"])
+                + breakfast_chip("non-flex", apk(cur, "inr_nf_member"),
+                                 apk(cur, "inr_nf_bb_member"),
+                                 b["nights"], config["adults"])
+                + '</div>')
 
             # recommendation score (0–100): affordability, location,
             # breakfast economics, value vs floor, and beating the booking
@@ -953,6 +982,7 @@ def render_page(config, history, fx, interactive=False, public=False,
             bb_box = price_box("Flexible + breakfast", None, None)
             nf_box = price_box("Non-flexible", None, None)
             nf_bb_box = price_box("Non-flex + breakfast", None, None)
+            bfast_html = ""
 
         open_url = BOOKING_URL.format(code=b["code"], dateIn=b["dateIn"],
                                       nights=b["nights"],
@@ -1071,7 +1101,7 @@ def render_page(config, history, fx, interactive=False, public=False,
         city_part = f'{b["city"]} · ' if b.get("city") else ""
         room_part = (f'<div class="hmeta">room: {room_name}</div>'
                      if room_name else "")
-        insights_html = ""
+        insights_html = bfast_html
         trend = spark(series, eff_booked)
         trend_html = f'<div class="trend">{trend}</div>' if trend else ""
         body_rows.append(f"""<div class="card{' pinned' if pinned else ''}"
