@@ -89,5 +89,24 @@
    51.214633,
    4.410914
   ]
+ },
+ "C7L1": {
+  "KGB": "Superior Garden View King Bed",
+  "TWB": "Superior Garden View Twin Bed",
+  "KGBOF": "Superior Ocean View King Bed",
+  "TWBOF": "Superior Ocean View Twin Bed",
+  "KGARV": "Deluxe River View King Bed",
+  "TWARV": "Deluxe River View Twin Bed",
+  "KGAOF": "Deluxe Ocean View King Bed",
+  "TWAOF": "Deluxe Ocean View Twin Bed",
+  "KGAPS": "Deluxe Pool View King Bed",
+  "TWAPS": "Deluxe Pool View Twin Bed",
+  "SKB": "Suite Ocean View King Bed",
+  "SKA": "Deluxe Ocean View King Bed",
+  "SKP": "Royal Suite",
+  "_gps": [
+   6.418052,
+   80.001185
+  ]
  }
 }
