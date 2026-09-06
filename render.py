@@ -153,6 +153,10 @@ details select { padding:.45rem .55rem; border:1px solid var(--line);
   color:color-mix(in srgb, var(--fg) 82%, var(--accent)); }
 .insights b { color:var(--accent); }
 .insights .bfx em { font-style:normal; color:var(--muted); }
+.ptsalt { margin-top:.45rem; padding-top:.45rem; font-size:.78rem;
+  color:var(--muted); border-top:1px dashed var(--line); }
+.ptsalt b { font-weight:600; color:color-mix(in srgb,var(--fg) 70%,var(--muted)); }
+.ptsalt em { display:block; font-style:normal; margin-top:.15rem; }
 .insights .bfx.none { background:none; color:var(--muted);
   border:1px dashed var(--line); }
 .cactions { display:flex; flex-wrap:wrap; gap:1.1rem; align-items:baseline;
@@ -713,6 +717,16 @@ def render_page(config, history, fx, interactive=False, public=False,
   <small>across {booked_n} booked stay(s)</small>
 </div>"""
 
+    # Accor's loyalty page converts points at its own, much staler rate
+    # than its booking engine, so the same balance is quoted two ways.
+    # Show both rather than let the dashboard look wrong against Accor.
+    q_rate = config.get("accor_page_inr_per_point")
+    quoted = (f'<div class="ptsalt">Accor\'s account page says '
+              f'<b>{fmt_inr(remaining_pts * q_rate)}</b>'
+              f'<em>it converts at ₹{q_rate / 0.02:,.2f}/€; this page uses '
+              f'the booking rate, ₹{fx:,.2f}/€</em></div>'
+              if q_rate and fx else "")
+
     points_bar = "" if public else f"""
 <div class="pointsbar">
   <div class="ptshero">
@@ -720,6 +734,7 @@ def render_page(config, history, fx, interactive=False, public=False,
     <div class="ptsbig">{remaining_pts:,}</div>
     <div class="ptsworth">{fmt_inr(pts_inr(remaining_pts, fx)) if fx
                            else f"€{remaining_pts * 0.02:,.2f}"}</div>
+    {quoted}
   </div>
   {covrow("earned in total", total_pts)}
   {covrow("used in bookings", used_pts)}
