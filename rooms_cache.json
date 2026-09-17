@@ -43,7 +43,9 @@
   "_gps": [
    50.942563,
    6.957725
-  ]
+  ],
+  "SGC": "Standard Room with 1 single bed",
+  "TWC": "Standard Room with Twin Beds"
  },
  "1306": {
   "QED": "Standard Room",
