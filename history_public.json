@@ -9524,5 +9524,126 @@
     }
    }
   ]
+ },
+ {
+  "date": "2026-09-21",
+  "checked_at": "2026-09-21T16:35:25+05:30",
+  "duration_seconds": 14,
+  "fx_inr_per_eur": 109.994667,
+  "hotels": [
+   {
+    "code": "0739",
+    "uid": "0739:2026-09-24:2",
+    "name": "ibis Köln Am Dom",
+    "error": "no flexible rate (availability: UNAVAILABLE)"
+   },
+   {
+    "code": "1306",
+    "uid": "1306:2026-09-24:2",
+    "name": "Mondial am Dom Cologne - MGallery",
+    "room": "QED",
+    "room_name": "Standard Room",
+    "currency": "INR",
+    "member_amount": 46808.29,
+    "standard_amount": 49271.88,
+    "rate_label": "FLEXIBLE RATE",
+    "bb_member_amount": 59750.28,
+    "bb_standard_amount": 62930.98,
+    "bb_rate_label": "FLEXIBLE RATE - BREAKFAST INCLUDED",
+    "nf_member_amount": 39776.06,
+    "nf_standard_amount": 41869.53,
+    "nf_bb_member_amount": 52718.05,
+    "nf_bb_standard_amount": 55528.63,
+    "inr_member": 46808.29,
+    "inr_standard": 49271.88,
+    "inr_bb_member": 59750.28,
+    "inr_bb_standard": 62930.98,
+    "inr_nf_member": 39776.06,
+    "inr_nf_standard": 41869.53,
+    "inr_nf_bb_member": 52718.05,
+    "inr_nf_bb_standard": 55528.63,
+    "eur_member": 425.5505405548434,
+    "eur_bb_member": 543.2106994787301,
+    "eur_nf_member": 361.61807735642304,
+    "eur_nf_bb_member": 479.2782362803098,
+    "prev": {
+     "at": "2026-09-21T12:29:08",
+     "inr_member": 46808.29,
+     "inr_bb_member": 59750.28,
+     "inr_nf_member": 39776.06,
+     "inr_nf_bb_member": 52718.05
+    }
+   },
+   {
+    "code": "0649",
+    "uid": "0649:2026-09-26:1",
+    "name": "ibis Schiphol Amsterdam Airport",
+    "room": "TWC",
+    "room_name": "TWC",
+    "currency": "INR",
+    "member_amount": 12157.77,
+    "standard_amount": 13508.63,
+    "rate_label": "FLEXIBLE RATE",
+    "bb_member_amount": 15802.59,
+    "bb_standard_amount": 17584.33,
+    "bb_rate_label": "FLEXIBLE RATE - BREAKFAST INCLUDED",
+    "nf_member_amount": 11004.88,
+    "nf_standard_amount": 12227.64,
+    "nf_bb_member_amount": 14649.69,
+    "nf_bb_standard_amount": 16303.34,
+    "inr_member": 12157.77,
+    "inr_standard": 13508.63,
+    "inr_bb_member": 15802.59,
+    "inr_bb_standard": 17584.33,
+    "inr_nf_member": 11004.88,
+    "inr_nf_standard": 12227.64,
+    "inr_nf_bb_member": 14649.69,
+    "inr_nf_bb_standard": 16303.34,
+    "eur_member": 110.5305405397518,
+    "eur_bb_member": 143.6668743221887,
+    "eur_nf_member": 100.0492142041759,
+    "eur_nf_bb_member": 133.18545707311426,
+    "prev": {
+     "at": "2026-09-21T12:29:08",
+     "inr_member": 12157.77,
+     "inr_bb_member": 15802.59,
+     "inr_nf_member": 11004.88,
+     "inr_nf_bb_member": 14649.69
+    }
+   },
+   {
+    "code": "5046",
+    "uid": "5046:2026-09-21:2",
+    "name": "ibis budget Brugge Centrum Station",
+    "error": "no flexible rate (availability: AVAILABLE)"
+   },
+   {
+    "code": "B7M3",
+    "uid": "B7M3:2026-09-23:1",
+    "name": "Aparthotel Adagio Antwerp City Center",
+    "room": "CA2D",
+    "room_name": "Studio for 2 people double bed",
+    "currency": "INR",
+    "member_amount": 14183.43,
+    "standard_amount": 14888.41,
+    "rate_label": "FLEXIBLE RATE",
+    "bb_member_amount": 17741.4,
+    "bb_standard_amount": 18633.65,
+    "bb_rate_label": "FLEXIBLE RATE - BREAKFAST INCLUDED",
+    "inr_member": 14183.43,
+    "inr_standard": 14888.41,
+    "inr_bb_member": 17741.4,
+    "inr_bb_standard": 18633.65,
+    "eur_member": 128.94652428921847,
+    "eur_bb_member": 161.29327433665486,
+    "prev": {
+     "at": "2026-09-21T12:29:08",
+     "inr_member": 14183.43,
+     "inr_bb_member": 17741.4,
+     "inr_nf_member": null,
+     "inr_nf_bb_member": null
+    }
+   }
+  ]
  }
 ]
