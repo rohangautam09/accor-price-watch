@@ -582,12 +582,20 @@ def pts_inr(pts, fx):
     return pts * 0.02 * fx
 
 
-def max_points_for(eur, tax_pct=0.0):
-    """Most points Accor will let you put on a stay: 2,000-pt steps on the
-    tax-exclusive amount (taxes are never points-payable)."""
-    if not eur:
-        return 0
-    return int((eur / (1 + (tax_pct or 0) / 100)) // 40) * 2000
+def tax_split(booked_eur, flat_eur=0.0, pct=0.0):
+    """Split a booked total into (points-eligible part, city tax).
+
+    The tax rides inside the total either way Accor quotes it — a flat
+    per-person-per-night amount (Belgium) or a percentage (NL/DE) — so it
+    is split back out, never added on top. Points can never pay it, which
+    is the only reason the split matters.
+    """
+    if not booked_eur:
+        return 0.0, 0.0
+    if flat_eur:
+        return max(booked_eur - flat_eur, 0.0), min(flat_eur, booked_eur)
+    elig = booked_eur / (1 + (pct or 0) / 100)
+    return elig, booked_eur - elig
 
 
 def mask_ref(ref):
@@ -649,12 +657,13 @@ def render_page(config, history, fx, interactive=False, public=False,
             continue
         booked_n += 1
         used = int(b.get("points_used", 0))
-        cap = max_points_for(b["booked_eur"], b.get("city_tax_pct"))
-        need_pts += max(cap - used, 0)
         flat = (float(b.get("city_tax_flat_eur") or 0)
                 * config["adults"] * int(b["nights"]))
+        elig, tax = tax_split(b["booked_eur"], flat, b.get("city_tax_pct"))
+        cap = int(elig // 40) * 2000
+        need_pts += max(cap - used, 0)
         pts_on_bookings += used
-        stay_due = max(b["booked_eur"] - used * 0.02, 0) + flat
+        stay_due = max(elig - used * 0.02, 0) + tax
         due_eur += stay_due
         if used:
             pts_group["eur"] += stay_due
@@ -1005,17 +1014,24 @@ def render_page(config, history, fx, interactive=False, public=False,
         b_pts = int(b.get("points_used", 0))
         meal_txt = "breakfast included" if wants_bb else "room only"
         if b["booked_inr"]:
+            # The city tax rides INSIDE the booked total either way it is
+            # quoted — a flat per-person amount (Belgium) or a percentage
+            # (NL/DE) — so it is split back out, never added on top. What
+            # it changes is that points cannot be spent on it.
             flat_eur = (float(b.get("city_tax_flat_eur") or 0)
                         * config["adults"] * int(b["nights"]))
-            cap = max_points_for(b["booked_eur"] or 0, b.get("city_tax_pct"))
+            elig_eur, tax_eur = tax_split(b.get("booked_eur") or 0,
+                                          flat_eur, b.get("city_tax_pct"))
+            cap = int(elig_eur // 40) * 2000
             rows = [f'<div class="tiny">€{b["booked_eur"]:,.2f} · {meal_txt}'
                     f'</div>' if b.get("booked_eur") else
                     f'<div class="tiny">{meal_txt}</div>']
             if not public and b.get("booked_eur"):
-                cash_eur = max(b["booked_eur"] - b_pts * 0.02, 0) + flat_eur
+                cash_eur = max(elig_eur - b_pts * 0.02, 0) + tax_eur
                 tax_note = (f' <span class="tiny">incl. '
-                            f'{fmt_inr(flat_eur * fx) if fx else f"€{flat_eur:,.2f}"}'
-                            f' city tax</span>' if flat_eur else "")
+                            f'{fmt_inr(tax_eur * fx) if fx else f"€{tax_eur:,.2f}"}'
+                            f' city tax, which points cannot pay</span>'
+                            if tax_eur else "")
                 if is_booked and b_pts:
                     rows.append(
                         f'<div class="bline"><span>{b_pts:,} pts</span>'
@@ -1027,7 +1043,7 @@ def render_page(config, history, fx, interactive=False, public=False,
                         f'<span><b>{fmt_inr(cash_eur * fx) if fx else f"€{cash_eur:,.2f}"}'
                         f'</b></span></div>{tax_note}')
                 if not b_pts and cap:
-                    with_cash = (b["booked_eur"] - cap * 0.02 + flat_eur)
+                    with_cash = max(elig_eur - cap * 0.02, 0) + tax_eur
                     hint = ("with points: " if is_booked
                             else "if booked with points: ")
                     rows.append(
