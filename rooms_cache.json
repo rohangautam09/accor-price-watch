@@ -59,7 +59,13 @@
   "_gps": [
    52.325325,
    4.795116
-  ]
+  ],
+  "DBB": "Superior Room with 1 Double Bed",
+  "TWC": "Room with twin beds",
+  "TRB": "Superior Room with 3 single beds",
+  "D3C": "Room for four persons",
+  "TWB": "Superior Room with 2 single beds",
+  "D3B": "Superior Room with 1 double bed and 2 single beds"
  },
  "2783": {
   "QEB": "SUPERIOR ROOM - 1 Queen bed - GARDEN, COURTYARD OR CITY VIEW",
