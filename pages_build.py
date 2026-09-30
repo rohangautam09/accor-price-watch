@@ -23,6 +23,7 @@ import check
 from check import (CONFIG, UA, capture_templates, extract_room_names,
                    fast_fetch, get_fx_rates, offers_to_result, uid_of)
 from redemptions_render import render_redemptions
+from trips_render import render_trips
 from render import (PAIR, PLUS_PCT, accor_plus_price, fmt_inr,
                     render_page, tax_split)
 
@@ -45,21 +46,31 @@ def nav(active):
         on = ' class="on"' if href == active else ""
         return f'<a{on} href="{href}">{label}</a>'
     return ('<div class="tabs">' + a("index.html", "Accor")
-            + a("redemptions.html", "Redemptions") + '</div>')
+            + a("redemptions.html", "Redemptions")
+            + a("trips.html", "Trips") + '</div>')
 
 
-def build_redemptions():
-    """Written on every run, including a failed price check — it reads only
-    the redemption log, which has nothing to do with today's prices."""
-    if not REDEMPTIONS.exists():
-        return
-    data = json.loads(REDEMPTIONS.read_text())
+def build_ledger():
+    """Written on every run, including a failed price check — these read the
+    redemption and trip logs, which have nothing to do with today's prices."""
+    entries = (json.loads(REDEMPTIONS.read_text()).get("entries", [])
+               if REDEMPTIONS.exists() else [])
     trips = (json.loads(TRIPS.read_text()).get("trips", [])
              if TRIPS.exists() else [])
-    (BASE / "redemptions.html").write_text(
-        render_redemptions(data, nav=nav("redemptions.html"),
-                           interactive=False, trips=trips))
-    print(f'redemptions.html: {len(data.get("entries", []))} redemption(s)')
+    if REDEMPTIONS.exists():
+        (BASE / "redemptions.html").write_text(
+            render_redemptions({"entries": entries,
+                                "currency_targets": json.loads(
+                                    REDEMPTIONS.read_text()).get(
+                                        "currency_targets", {})},
+                               nav=nav("redemptions.html"),
+                               interactive=False, trips=trips))
+        print(f"redemptions.html: {len(entries)} redemption(s)")
+    if TRIPS.exists():
+        (BASE / "trips.html").write_text(
+            render_trips({"trips": trips}, nav=nav("trips.html"),
+                         interactive=False, redemptions=entries))
+        print(f"trips.html: {len(trips)} trip(s)")
 
 
 def booked_now(b, fx):
@@ -177,7 +188,7 @@ def find_drops(results, fx):
 
 
 async def main():
-    build_redemptions()
+    build_ledger()
     await asyncio.sleep(random.randint(0, 90))   # avoid clockwork timing
     t0 = time.monotonic()
     results, fx, error = await fetch_all()
