@@ -1,0 +1,148 @@
+{
+ "trips": [
+  {
+   "id": "paris-2023",
+   "name": "Paris",
+   "dateFrom": "2023-05-06",
+   "dateTo": "2023-05-11",
+   "total_stated_inr": 350000.0,
+   "expenses": {},
+   "notes": "",
+   "exclude_from_totals": true
+  },
+  {
+   "id": "goa-2024",
+   "name": "Goa",
+   "dateFrom": "2024-02-10",
+   "dateTo": "2024-02-14",
+   "total_stated_inr": 38024.08,
+   "expenses": {
+    "Stays": 10253,
+    "Commute": 9564.33,
+    "Eating out": 8640.35,
+    "Flights": 9566.4
+   },
+   "notes": ""
+  },
+  {
+   "id": "udaipur-2014",
+   "name": "Udaipur · Ahmedabad · Gandhinagar",
+   "dateFrom": "2024-11-02",
+   "dateTo": "2024-11-09",
+   "total_stated_inr": 54652.97,
+   "expenses": {
+    "Activities": 4927.0,
+    "Commute": 6742.78,
+    "Eating out": 14383.34,
+    "Flights": 9656.0,
+    "Shopping": 519.0,
+    "Souvenirs": 1630.0,
+    "Stays": 16794.85
+   },
+   "notes": ""
+  },
+  {
+   "id": "singapore-2025",
+   "name": "Singapore",
+   "dateFrom": "2025-04-30",
+   "dateTo": "2025-05-06",
+   "total_stated_inr": 145273.16,
+   "expenses": {
+    "Stays": 4000,
+    "Eating out": 19704.87,
+    "Flights": 36838.4,
+    "Commute": 13778.95,
+    "Activities": 29494.93,
+    "Souvenirs": 1242.47,
+    "Shopping": 29283.22,
+    "Other": 260,
+    "Roaming": 1853,
+    "Forex": 1751.29,
+    "Travel insurance": 7066
+   },
+   "notes": ""
+  },
+  {
+   "id": "thailand-2025",
+   "name": "Thailand",
+   "dateFrom": "2025-11-08",
+   "dateTo": "2025-11-15",
+   "total_stated_inr": 144141.28,
+   "expenses": {
+    "Activities": 31022.38,
+    "Commute": 15318.03,
+    "Eating out": 30410.25,
+    "Flights": 43258.0,
+    "Forex": 4305.06,
+    "Other": 5817.69,
+    "Roaming": 2093.0,
+    "Shopping": 6216.37,
+    "Stays": 4510.5,
+    "Travel insurance": 1190.0
+   },
+   "notes": ""
+  },
+  {
+   "id": "goa-2026",
+   "name": "Goa",
+   "dateFrom": "2026-05-02",
+   "dateTo": "2026-05-05",
+   "total_stated_inr": 36409.0,
+   "expenses": {
+    "Commute": 2386.0,
+    "Eating out": 12951.0,
+    "Flights": 15168.0,
+    "Stays": 5904.0
+   },
+   "notes": "",
+   "exclude_from_totals": false
+  },
+  {
+   "id": "amsterdam-2026",
+   "name": "Amsterdam · Brugge · Cologne",
+   "dateFrom": "2026-09-16",
+   "dateTo": "2026-09-27",
+   "total_stated_inr": null,
+   "expenses": {
+    "Activities": 55441.28,
+    "Commute": 51995.85,
+    "Documentation": 1793.0,
+    "Eating out": 51645.6,
+    "Flights": 72229.56,
+    "Forex": 3339.78,
+    "Other": 5288.15,
+    "Roaming": 3791.0,
+    "Shopping": 27993.09,
+    "Souvenirs": 6812.8,
+    "Stays": 10732.43,
+    "Travel insurance": 1820.0,
+    "Visa": 37747.0
+   },
+   "notes": "",
+   "exclude_from_totals": false,
+   "staycation": false
+  },
+  {
+   "id": "pune-2025",
+   "name": "Pune",
+   "dateFrom": "2025-06-07",
+   "dateTo": "2025-06-08",
+   "expenses": {},
+   "total_stated_inr": null,
+   "exclude_from_totals": false,
+   "staycation": true,
+   "notes": ""
+  },
+  {
+   "id": "mumbai-2025",
+   "name": "Mumbai",
+   "dateFrom": "2025-09-06",
+   "dateTo": "2025-09-07",
+   "expenses": {},
+   "total_stated_inr": null,
+   "exclude_from_totals": false,
+   "staycation": true,
+   "notes": ""
+  }
+ ]
+}

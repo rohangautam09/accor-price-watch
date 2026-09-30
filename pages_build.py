@@ -22,17 +22,44 @@ from playwright.async_api import async_playwright
 import check
 from check import (CONFIG, UA, capture_templates, extract_room_names,
                    fast_fetch, get_fx_rates, offers_to_result, uid_of)
+from redemptions_render import render_redemptions
 from render import (PAIR, PLUS_PCT, accor_plus_price, fmt_inr,
-                    max_points_for, render_page)
+                    render_page, tax_split)
 
 BASE = pathlib.Path(__file__).parent
 HIST = BASE / "history_public.json"
+REDEMPTIONS = BASE / "redemptions.json"
+TRIPS = BASE / "trips.json"
 STATE = BASE / "alert_state.json"
 STATUS = BASE / "status.json"
 REPO = "rohangautam09/accor-price-watch"
 WORKFLOW = "pages-check.yml"
 KEEP_RUNS = 200
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
+
+
+def nav(active):
+    """Both published pages share one shell. Links are relative so they
+    work under the /accor-price-watch/ path Pages serves from."""
+    def a(href, label):
+        on = ' class="on"' if href == active else ""
+        return f'<a{on} href="{href}">{label}</a>'
+    return ('<div class="tabs">' + a("index.html", "Accor")
+            + a("redemptions.html", "Redemptions") + '</div>')
+
+
+def build_redemptions():
+    """Written on every run, including a failed price check — it reads only
+    the redemption log, which has nothing to do with today's prices."""
+    if not REDEMPTIONS.exists():
+        return
+    data = json.loads(REDEMPTIONS.read_text())
+    trips = (json.loads(TRIPS.read_text()).get("trips", [])
+             if TRIPS.exists() else [])
+    (BASE / "redemptions.html").write_text(
+        render_redemptions(data, nav=nav("redemptions.html"),
+                           interactive=False, trips=trips))
+    print(f'redemptions.html: {len(data.get("entries", []))} redemption(s)')
 
 
 def booked_now(b, fx):
@@ -128,9 +155,11 @@ def find_drops(results, fx):
             continue
         d1 = dt.date.fromisoformat(b["dateIn"])
         d2 = d1 + dt.timedelta(days=int(b["nights"]))
-        pts = max_points_for(
+        elig, _ = tax_split(
             ((r.get("eur_bb_member") if key == "inr_bb_member" else None)
-             or r.get("eur_member") or 0) * ratio, b.get("city_tax_pct"))
+             or r.get("eur_member") or 0) * ratio,
+            0.0, b.get("city_tax_pct"))
+        pts = int(elig // 40) * 2000
         drops.append(
             f'### {b["name"]}\n'
             f'{d1:%d %b} → {d2:%d %b %Y} · {b["nights"]} night(s)\n\n'
@@ -144,6 +173,7 @@ def find_drops(results, fx):
 
 
 async def main():
+    build_redemptions()
     await asyncio.sleep(random.randint(0, 90))   # avoid clockwork timing
     t0 = time.monotonic()
     results, fx, error = await fetch_all()
@@ -159,6 +189,7 @@ async def main():
             (BASE / "index.html").write_text(
                 render_page(CONFIG, history, history[-1].get("fx_inr_per_eur"),
                             cloud=True, repo=REPO, workflow=WORKFLOW,
+                            nav=nav("index.html"),
                             failure=f"{error} ({now:%d %b %H:%M} IST)"))
         return 0
 
@@ -183,7 +214,7 @@ async def main():
     history = history[-KEEP_RUNS:]
     HIST.write_text(json.dumps(history, indent=1, ensure_ascii=False))
     (BASE / "index.html").write_text(
-        render_page(CONFIG, history, fx, cloud=True,
+        render_page(CONFIG, history, fx, cloud=True, nav=nav("index.html"),
                     repo=REPO, workflow=WORKFLOW))
 
     drops, fp = find_drops(results, fx)
