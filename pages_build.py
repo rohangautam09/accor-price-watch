@@ -73,6 +73,10 @@ async def fetch_all():
     rates = get_fx_rates()
     fx = rates.get("INR") if rates else None
     bookings = CONFIG["bookings"]
+    # every stay marked stayed leaves nothing to watch — a normal state
+    # between trips, not a failure to fetch
+    if not bookings:
+        return [], fx, "no hotels are being watched right now"
     rooms = check.load_rooms_cache()
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
