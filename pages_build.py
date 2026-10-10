@@ -45,9 +45,9 @@ def nav(active):
     def a(href, label):
         on = ' class="on"' if href == active else ""
         return f'<a{on} href="{href}">{label}</a>'
-    return ('<div class="tabs">' + a("index.html", "Accor")
+    return ('<div class="tabs">' + a("trips.html", "Trips")
             + a("redemptions.html", "Redemptions")
-            + a("trips.html", "Trips") + '</div>')
+            + a("index.html", "Accor") + '</div>')
 
 
 def build_ledger():
